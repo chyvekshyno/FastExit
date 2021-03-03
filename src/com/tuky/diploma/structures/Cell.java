@@ -13,17 +13,17 @@ public class Cell {
     private boolean mark;
 
     private static final int[][] neighbour_ind = {
-            {7,     0,      4},
-            {3,    -1,      1},
-            {6,     2,      5}
+            {7,     0,      1},
+            {6,    -1,      2},
+            {5,     4,      3}
     };
 
     private static final int[] neighbour_left_ind = {
-                4, 5, 6, 7, 1, 2, 3, 0
+            7, 0, 1, 2, 3, 4, 5, 6
     };
 
     private static final int[] neighbour_right_ind = {
-            7, 4, 5, 6, 0, 1, 2, 3
+            1, 2, 3, 4, 5, 6, 7, 0
     };
     //endregion
 
@@ -76,6 +76,15 @@ public class Cell {
                     , neighbours.get(neighbour_left_ind[nvec]));
             cellNeighbours.put(neighbour_left_ind[nvec_inv]
                     , neighbours.get(neighbour_right_ind[nvec]));
+        } else {
+            cellNeighbours.put(neighbour_right_ind[nvec_inv]
+                    , neighbours.get(neighbour_left_ind[neighbour_left_ind[nvec]]));
+            cellNeighbours.put(neighbour_right_ind[neighbour_right_ind[nvec_inv]]
+                    , neighbours.get(neighbour_left_ind[nvec]));
+            cellNeighbours.put(neighbour_left_ind[nvec_inv]
+                    , neighbours.get(neighbour_right_ind[neighbour_right_ind[nvec]]));
+            cellNeighbours.put(neighbour_left_ind[neighbour_left_ind[nvec_inv]]
+                    , neighbours.get(neighbour_right_ind[nvec]));
         }
 
         Cell cell = new Cell(cellNeighbours);
@@ -89,6 +98,14 @@ public class Cell {
 
     private int vecToNeighbour(int x, int y) {
         return neighbour_ind[x+1][y+1];
+    }
+
+    private int neighbourLeft(int nvec) {
+        return nvec == 0 ? 7 : nvec - 1;
+    }
+
+    private int neighbourRight(int nvec) {
+        return nvec == 7 ? 0 : nvec + 1;
     }
 
     private void setNeighbour(Cell cell, int x, int y) {
