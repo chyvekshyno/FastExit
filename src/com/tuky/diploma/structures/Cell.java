@@ -1,8 +1,7 @@
-package com.tuky;
+package com.tuky.diploma.structures;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * class describes cell unit for cellular automata
