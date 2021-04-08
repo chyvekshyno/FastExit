@@ -1,26 +1,29 @@
 {
-  "name" : "area0",
+  "areaName" : "area0",
   "zones" : [
     {
-      "name" : "room0",
-      "polygons" : [
-        ['l', 0., 0.],
-        ['l', 5., 0.],
-        ['l', 5., 5., [5., 2.]],
-        ['l', 0., 5.],
-        ['l', 0., 0.]
+      "zoneName" : "room0",   //  0
+      "shape" : [
+        { "type" : 'l', "coord" : [0., 0.]   },
+        { "type" : 'l', "coord" : [5., 0.]   },
+        { "type" : 'l', "coord" : [5., 1.]   },
+        { "type" : 'e', "coord" : [5., 3.]   },   //  0
+        { "type" : 'l', "coord" : [5., 5.]   },
+        { "type" : 'l', "coord" : [0., 5.]   },
+        { "type" : 'l', "coord" : [0., 0.]   },
       ]
     }, {
-      "name" : "room1",
-      "polygons" : [
-        ['l', 0., 0.],
-        ['l', 5., 0.],
-        ['l', 5., 5., [5., 2.]],
-        ['l', 0., 5.],
-        ['l', 0., 0.]
+      "zoneName" : "room1",   //  1
+      "shape" : [
+        { "type" : 'l', "coord" : [0., 0.]   },
+        { "type" : 'l', "coord" : [8., 0.]   },
+        { "type" : 'e', "coord" : [8., 2.]   },   //  0
+        { "type" : 'l', "coord" : [8., 8.]   },
+        { "type" : 'l', "coord" : [0., 8.]   },
+        { "type" : 'l', "coord" : [0., 0.]   }
       ]
     } ],
   "exits" : [
-    [[0,0], [1,0]]
+    [0, 0, 1, 0]
   ]
 }

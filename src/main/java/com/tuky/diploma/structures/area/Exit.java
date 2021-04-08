@@ -1,34 +1,38 @@
 package com.tuky.diploma.structures.area;
 
-public class Exit extends AreaObject{
+import java.util.HashMap;
+
+public class Exit extends Polygon{
+
+    private static int IND = 0;
+    private static HashMap<Integer, Exit> exits = new HashMap<>();
+
     private final Zone zone;
-    private final int length;
-    private final Polygon polygon;
-
     private Exit another;
-
     private boolean connected;
-    public Exit(Zone zone, Polygon polygon, int length) {
+
+    private final int _ind;
+
+    public Exit(Coord coord1, Coord coord2, Zone zone) {
+        super(coord1, coord2);
         this.zone = zone;
-        this.polygon = polygon;
-        this.length = length;
-        this.connected = false;
+        this._ind = IND++;
+    }
+
+    public int getInd() {
+        return _ind;
     }
 
     public Zone getZone() {
         return zone;
     }
 
-    public Polygon getPolygon() {
-        return polygon;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
     public Exit getAnother() {
         return another;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 
     public void disconnect() {
@@ -42,9 +46,5 @@ public class Exit extends AreaObject{
         this.another = another;
         another.connect(this);
         connected = true;
-    }
-
-    public boolean isConnected() {
-        return connected;
     }
 }
