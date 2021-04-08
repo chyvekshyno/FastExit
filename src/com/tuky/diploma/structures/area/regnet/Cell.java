@@ -1,4 +1,4 @@
-package com.tuky.diploma.structures;
+package com.tuky.diploma.structures.area.regnet;
 
 import java.util.HashMap;
 import java.util.Map;

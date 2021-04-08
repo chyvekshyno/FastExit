@@ -1,4 +1,4 @@
-package com.tuky.diploma.structures;
+package com.tuky.diploma.structures.area.regnet;
 
 /**
  * Create cell map from JSON file.
@@ -19,4 +19,5 @@ package com.tuky.diploma.structures;
  * Start build floor from input door
  */
 public class CellMap {
+
 }
