@@ -33,6 +33,7 @@ hs_err_pid*
 
 # Intelij Idea generated
 .idea/
+src/main/java/com/tuky/diploma/tests/
 *.iml
 
 
