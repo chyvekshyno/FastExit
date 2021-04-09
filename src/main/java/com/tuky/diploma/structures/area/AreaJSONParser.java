@@ -74,7 +74,7 @@ public class AreaJSONParser {
             jsonCoord = (JSONArray) jsonObj.get(TAG_COORD);
             next = parseCoord(jsonCoord);
 
-            polygonList.add(parsePolygon(prev, next, (char) jsonObj.get(TAG_POLYGON_TYPE)));
+            polygonList.add(parsePolygon(prev, next, ((String) jsonObj.get(TAG_POLYGON_TYPE)).charAt(0)));
 
             prev = next;
         }

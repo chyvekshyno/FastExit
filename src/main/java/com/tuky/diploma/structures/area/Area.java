@@ -5,8 +5,9 @@ import java.util.List;
 public class Area {
     private List<Zone> zones;
 
-    public Area(List<Zone> zones, List<List<Integer>> pairs){
+    public Area(List<Zone> zones, List<List<Integer>> connections){
         this.zones = zones;
+        connectAll(connections);
     }
 
     private void connectAll(List<List<Integer>> connections) {
