@@ -1,6 +1,6 @@
 package com.tuky.diploma.structures.area;
 
-public class Polygon extends AreaObject {
+public class Polygon {
     protected final Coord coord1;
     protected final Coord coord2;
 

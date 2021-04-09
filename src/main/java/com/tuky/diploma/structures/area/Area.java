@@ -2,7 +2,7 @@ package com.tuky.diploma.structures.area;
 
 import java.util.List;
 
-public class Area extends AreaObject{
+public class Area {
     private List<Zone> zones;
 
     public Area(List<Zone> zones, List<List<Integer>> pairs){
