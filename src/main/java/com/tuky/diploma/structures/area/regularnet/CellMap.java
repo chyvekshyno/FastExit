@@ -1,4 +1,4 @@
-package com.tuky.diploma.structures.area.regnet;
+package com.tuky.diploma.structures.area.regularnet;
 
 /**
  * Create cell map from JSON file.

@@ -62,28 +62,28 @@ public class AreaJSONParser {
         return new Zone(parseShape(polygonsJsonArr));
     }
 
-    private static List<Polygon> parseShape(JSONArray shape) {
+    private static List<Side> parseShape(JSONArray shape) {
         JSONObject jsonObj = (JSONObject) shape.remove(0);
         JSONArray jsonCoord = (JSONArray) jsonObj.get(TAG_COORD);
         Coord prev = parseCoord(jsonCoord);
         Coord next;
 
-        List<Polygon> polygonList = new ArrayList<>();
+        List<Side> sideList = new ArrayList<>();
         for (Object it : shape) {
             jsonObj = (JSONObject) it;
             jsonCoord = (JSONArray) jsonObj.get(TAG_COORD);
             next = parseCoord(jsonCoord);
 
-            polygonList.add(parsePolygon(prev, next, ((String) jsonObj.get(TAG_POLYGON_TYPE)).charAt(0)));
+            sideList.add(parseSide(prev, next, ((String) jsonObj.get(TAG_POLYGON_TYPE)).charAt(0)));
 
             prev = next;
         }
-        return polygonList;
+        return sideList;
     }
 
-    private static Polygon parsePolygon(Coord a, Coord b, char type) {
+    private static Side parseSide(Coord a, Coord b, char type) {
         switch (type){
-            case 'l' : return new Polygon(a, b);
+            case 'l' : return new Side(a, b);
             case 'e' : return new Exit(a, b, null);
         } throw new IllegalArgumentException("No polygon type : " + type);
     }

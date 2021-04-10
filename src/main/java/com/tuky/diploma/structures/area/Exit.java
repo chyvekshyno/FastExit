@@ -1,8 +1,6 @@
 package com.tuky.diploma.structures.area;
 
-import java.util.HashMap;
-
-public class Exit extends Polygon{
+public class Exit extends Side {
 
     private final Zone zone;
     private Exit another;
