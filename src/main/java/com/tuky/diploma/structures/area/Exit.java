@@ -6,8 +6,8 @@ public class Exit extends Side {
     private Exit another;
     private boolean connected;
 
-    public Exit(Coord coord1, Coord coord2, Zone zone) {
-        super(coord1, coord2);
+    public Exit(DCoord DCoord1, DCoord DCoord2, Zone zone) {
+        super(DCoord1, DCoord2);
         this.zone = zone;
     }
 

@@ -2,13 +2,13 @@ package com.tuky.diploma.structures.area;
 
 import com.tuky.diploma.structures.addition.Pair;
 
-public class Coord extends Pair<Double> {
+public class Coord <T extends Number> extends Pair<T> {
 
-    public Coord(double x, double y) {
-        super(x, y);
+    public Coord(T a, T b) {
+        super(a, b);
     }
 
-    public static Coord getInstance(double x, double y) {
-        return new Coord(x, y);
+    public static <T extends Number> Coord<T> at(T x, T y) {
+        return new Coord<T>(x, y);
     }
 }

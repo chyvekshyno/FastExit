@@ -1,19 +1,19 @@
 package com.tuky.diploma.structures.addition;
 
 public class Pair<T> {
-    private final T a;
-    private final T b;
+    private final T x;
+    private final T y;
 
     public Pair(T a, T b) {
-        this.a = a;
-        this.b = b;
+        this.x = a;
+        this.y = b;
     }
 
-    public T getA() {
-        return a;
+    public T X() {
+        return x;
     }
 
-    public T getB() {
-        return b;
+    public T Y() {
+        return y;
     }
 }
