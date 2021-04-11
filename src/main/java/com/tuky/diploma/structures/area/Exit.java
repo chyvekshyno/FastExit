@@ -6,10 +6,11 @@ public class Exit extends Side {
     private Exit another;
     private boolean connected;
 
-    public Exit(DCoord DCoord1, DCoord DCoord2, Zone zone) {
-        super(DCoord1, DCoord2);
+    public Exit(IntCoord coord1, IntCoord coord2, Zone zone) {
+        super(coord1, coord2);
         this.zone = zone;
     }
+
 
     public Zone getZone() {
         return zone;

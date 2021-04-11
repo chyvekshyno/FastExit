@@ -101,99 +101,51 @@ public class CellMap {
     }
 
     private List<List<Cell>> outline(Zone zone) {
-        List<List<HSLS>> HArray = HSLSArray(shape(zone.getShape()));
+        List<HSLS> HArray = toHArray(zone.getShape());
 
         return null;
     }
 
-    private List<List<Cell>> shape(List<Side> zoneShape) {
+    private List<HSLS> toHArray(List<Side> zoneShape) {
         return zoneShape.stream()
-                .map(side -> bresenhamLine(side.getCoord1(), side.getCoord2()))
+                .flatMap(side -> bresenhamHArray(side.getCoord1(), side.getCoord2()).stream())
                 .collect(Collectors.toList());
     }
 
-    private List<List<HSLS>> HSLSArray(List<List<Cell>> shape) {
-        return shape.stream()
-                .map(this::toHSLS)
-                .collect(Collectors.toList());
-    }
-
-    private List<HSLS> toHSLS (List<Cell> side) {
-        List<HSLS> res = new ArrayList<>();
-        HSLS hsls;
-
-
-
-        return null;
-    }
-
-    //region    BRESENHAM
-    private List<Cell> bresenhamLine(IntCoord coord1, IntCoord coord2) {
+    private List<HSLS> bresenhamHArray(IntCoord coord1, IntCoord coord2) {
         int x0 = coord1.X();
         int y0 = coord1.Y();
         int x1 = coord2.X();
         int y1 = coord2.Y();
 
-        int dx = abs(x0 - x1);
-        int dy = abs(y0 - y1);
-
-        if (dy < dx) {
-            if (x0 > x1)    return bresenhamLineLow(x1, y1, x0, y0);
-            else            return bresenhamLineLow(x0, y0, x1, y1);
+        if (x0 < x1) {
+            if (y0 < y1)    return bresenhamHArray(x0, y0, x1, y1, 1);
+            else            return bresenhamHArray(x0, y0, x1, y1, -1);
         } else {
-            if (y0 > y1)    return bresenhamLineHigh(x1, y1, x0, y0);
-            else            return bresenhamLineHigh(x0, y0, x1, y1);
+            if (y0 < y1)    return bresenhamHArray(x1, y1, x0, y0, -1);
+            else            return bresenhamHArray(x1, y1, x0, y0, 1);
         }
     }
 
-    private List<Cell> bresenhamLineLow(int x0, int y0, int x1, int y1) {
+    private List<HSLS> bresenhamHArray(int x0, int y0, int x1, int y1, int y_step) {
         int dx = x1 - x0;
-        int dy = y1 - y0;
-        int y_step = 1;
-
-        if (dy < 0) {
-            y_step = -1;
-            dy = -dy;
-        }
-        int D = 2 * dy;
+        int D = 2 * (y1 - y0) * y_step;
         int error = D - dx;
 
-        List<Cell> bresenham = new ArrayList<>();
-        for (int x = x0, y = y0; x < x1; x++) {
-            bresenham.add(at(x, y));
+        List<HSLS> HSLSArr = new ArrayList<>();
+        for (int xR = x0, xL = x0, y = y0; xR < x1; xR++) {
             error += D;
             if (error >= 0){
-                y += y_step;
+                HSLSArr.add(new HSLS(y, xL, x0));
                 error -= 2 * dx;
+
+                y += y_step;
+                xL = xR + 1;
             }
         }
-        return bresenham;
+        return HSLSArr;
     }
 
-    private List<Cell> bresenhamLineHigh(int x0, int y0, int x1, int y1) {
-        int dx = x1 - x0;
-        int dy = y1 - y0;
-        int x_step = 1;
-
-        if (dx < 0) {
-            x_step = -1;
-            dx = -dx;
-        }
-        int D = 2 * dx;
-        int error = D - dy;
-
-        List<Cell> bresenham = new ArrayList<>();
-        for (int x = x0, y = y0; y < y1; y++) {
-            bresenham.add(at(x, y));
-            error += D;
-            if (error >= 0){
-                x += x_step;
-                error -= 2 * dy;
-            }
-        }
-        return bresenham;
-    }
-    //endregion
     //endregion
 
 

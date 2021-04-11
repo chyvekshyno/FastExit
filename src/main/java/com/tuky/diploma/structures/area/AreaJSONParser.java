@@ -65,8 +65,8 @@ public class AreaJSONParser {
     private static List<Side> parseShape(JSONArray shape) {
         JSONObject jsonObj = (JSONObject) shape.remove(0);
         JSONArray jsonCoord = (JSONArray) jsonObj.get(TAG_COORD);
-        DCoord prev = parseCoord(jsonCoord);
-        DCoord next;
+        IntCoord prev = parseCoord(jsonCoord);
+        IntCoord next;
 
         List<Side> sideList = new ArrayList<>();
         for (Object it : shape) {
@@ -81,16 +81,16 @@ public class AreaJSONParser {
         return sideList;
     }
 
-    private static Side parseSide(DCoord a, DCoord b, char type) {
+    private static Side parseSide(IntCoord a, IntCoord b, char type) {
         switch (type){
             case 'l' : return new Side(a, b);
             case 'e' : return new Exit(a, b, null);
         } throw new IllegalArgumentException("No polygon type : " + type);
     }
 
-    private static DCoord parseCoord(JSONArray jsonCoord) {
-        return DCoord.at(
-                (double)jsonCoord.get(0),
-                (double)jsonCoord.get(1));
+    private static IntCoord parseCoord(JSONArray jsonCoord) {
+        return IntCoord.at(
+                (int)(long)jsonCoord.get(0),
+                (int)(long)jsonCoord.get(1));
     }
 }
