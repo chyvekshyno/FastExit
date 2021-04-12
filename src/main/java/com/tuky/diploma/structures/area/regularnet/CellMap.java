@@ -45,6 +45,10 @@ public class CellMap {
         map = cellRectangle(coord1, coord2);
     }
 
+    public CellMap(Zone zone) {
+        map = figure(zone);
+    }
+
     //endregion
 
 
@@ -133,7 +137,7 @@ public class CellMap {
             cellLine.add(cell);
             for (int w = x0 + 1; w < x1; w++) {
                 cell = Cell.at(w, y0);
-                cell.makeNeighbour(cellLine.get(w-x0-1), Cell.VEC_LEFT);
+                cell.meetNeighbour(cellLine.get(w-x0-1), Cell.VEC_LEFT);
                 cellLine.add(cell);
             }
             map.add(cellLine);
@@ -145,9 +149,9 @@ public class CellMap {
                 cellLine.add(cell);
                 for (int w = x0 + 1; w < x1; w++) {
                     cell = Cell.at(w, h);
-                    cell.makeNeighbour(cellLine.get(w-x0-1), Cell.VEC_LEFT);
-                    cell.makeNeighbour(get(w-1, h-1), Cell.VEC_TOP_LEFT);
-                    cell.makeNeighbour(get(w, h-1), Cell.VEC_TOP);
+                    cell.meetNeighbour(cellLine.get(w-x0-1), Cell.VEC_LEFT);
+                    cell.meetNeighbour(get(w-1, h-1), Cell.VEC_TOP_LEFT);
+                    cell.meetNeighbour(get(w, h-1), Cell.VEC_TOP);
                     cellLine.add(cell);
                 }
                 map.add(cellLine);
@@ -185,6 +189,13 @@ public class CellMap {
                 hsls1 = it.next();
                 cellLine.addAll(getRow(hsls0.y(), hsls0.xL(), hsls1.xR(), cellRect));
             }
+
+            //  remove neighbourhoods of cells NOT included to Zone
+            cellRect.get(y).forEach(cell -> {
+                if (!cellLine.contains(cell))
+                    cell.leaveAlone();
+            });
+
             cellMap.set(y, cellLine);
             cellLine.clear();
         }
@@ -285,9 +296,7 @@ public class CellMap {
     }
 
     public static CellMap of (Zone zone) {
-
-
-        return null;
+        return new CellMap(zone);
     }
 
     public static CellMap of (Area area) {

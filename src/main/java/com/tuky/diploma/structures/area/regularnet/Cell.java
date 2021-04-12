@@ -67,17 +67,31 @@ public class Cell {
         mark(true);
     }
 
-    public void makeNeighbour(Cell another, int vec) throws Exception {
-        makeNeighbour(another, vec, true);
+    public void meetNeighbour(Cell another, int vec) throws Exception {
+        meetNeighbour(another, vec, true);
     }
 
-    private void makeNeighbour(Cell another, int vec, boolean flag_first) throws Exception {
+    public void leaveAlone () {
+        for (int i = 0; i < NEIGHBOURS_COUNT; i++) {
+            leaveNeighbour(i, true);
+        }
+    }
+
+    private void leaveNeighbour(int vec, boolean flag_first) {
+        if (neighbours.get(vec) != NULL_CELL) {
+            if (flag_first)
+                neighbours.get(vec).leaveNeighbour(NEIGHBOURS_COUNT - vec, false);
+            neighbours.set(vec, NULL_CELL);
+        }
+    }
+
+    private void meetNeighbour(Cell another, int vec, boolean flag_first) throws Exception {
         if (neighbours.get(vec) != NULL_CELL)
             throw new Exception("Cell already has neighbour");
 
         neighbours.add(vec, another);
         if (flag_first){
-            another.makeNeighbour(this, NEIGHBOURS_COUNT-vec, false);
+            another.meetNeighbour(this, NEIGHBOURS_COUNT-vec, false);
         }
     }
 
