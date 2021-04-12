@@ -49,6 +49,10 @@ public class CellMap {
 
 
     //region    METHODS
+
+    private int getIndX(int x) { return x - MIN_X; }
+    private int getIndY(int y) { return y - MIN_Y; }
+
     //region    THIS MAP GETTERS
     public List<List<Cell>> getMap() {
         return map;
@@ -85,7 +89,7 @@ public class CellMap {
 
     //region GETTERS
     private Cell get(int x, int y, List<List<Cell>> cellRect) {
-        return cellRect.get(y - MIN_Y).get(x - MIN_X);
+        return cellRect.get(getIndY(y)).get(getIndX(x));
     }
 
     private Cell get(IntCoord coord, List<List<Cell>> cellRect) {
@@ -105,7 +109,7 @@ public class CellMap {
     }
 
     private List<Cell> getLine(int y, List<List<Cell>> cellRect) {
-        return cellRect.get(y - MIN_Y);
+        return cellRect.get(getIndY(y));
     }
 
     private List<Cell> getRow(int y, int x0, int x1, List<List<Cell>> cellRect) {
@@ -164,7 +168,7 @@ public class CellMap {
     //endregion
 
     private List<List<Cell>> figure(Zone zone) {
-        var ET = EdgeTable(null);
+        var ET = EdgeTable(zone);
         var cellRect = cellRectangle(zone);
 
 
@@ -188,29 +192,45 @@ public class CellMap {
         return cellMap;
     }
 
-    private List<List<HSLS>> EdgeTable (List<HSLS> HPolygon) {
+    private List<List<HSLS>> EdgeTable (Zone zone) {
+        return EdgeTable(toHPolygon(zone.getShape()), zone.MAX_Y() - zone.MIN_Y() + 1);
+    }
+
+    private List<List<HSLS>> EdgeTable (List<HSLS> HPolygon, int height) {
+        HSLS prev = HPolygon.remove(0);
         HSLS curr = HPolygon.remove(0);
-        HSLS prev = curr;
         HSLS next;
 
-        List<List<HSLS>> ET = new ArrayList<>();
-//        ET.add(curr)
+        List<List<HSLS>> ET = new ArrayList<>(Collections.nCopies(height, new ArrayList<>()));
+        ET.get(getIndY(prev.y())).add(prev);
+        ET.get(getIndY(curr.y())).add(curr);
         for (HSLS hel : HPolygon) {
-
+            next = hel;
+            if     ((prev.y() > curr.y() && next.y() < curr.y()) ||
+                    (prev.y() < curr.y() && next.y() > curr.y())) {
+                ET.get(getIndY(curr.y())).add(curr);
+            } else if  ((prev.y() > curr.y() && next.y() > curr.y()) ||
+                        (prev.y() < curr.y() && next.y() < curr.y())) {
+                ET.get(getIndY(curr.y())).add(curr);
+                ET.get(getIndY(curr.y())).add(curr);
+            }
+            prev = curr;
+            curr = next;
         }
 
+        ET.forEach(list -> list.sort(Comparator.comparing(HSLS::xL)));
         return ET;
     }
 
-    private List<List<HSLS>> groupHPolygon(List<HSLS> HArray, int y_min, int y_max) {
-        List<List<HSLS>> groups = new ArrayList<>(Collections
-                .nCopies(y_max - y_min + 1, new ArrayList<>()));
-
-        for (HSLS hsls : HArray)
-            groups.get(hsls.y()).add(hsls);
-
-        return groups;
-    }
+//    private List<List<HSLS>> groupHPolygon(List<HSLS> HArray, int y_min, int y_max) {
+//        List<List<HSLS>> groups = new ArrayList<>(Collections
+//                .nCopies(y_max - y_min + 1, new ArrayList<>()));
+//
+//        for (HSLS hsls : HArray)
+//            groups.get(hsls.y()).add(hsls);
+//
+//        return groups;
+//    }
 
     private List<HSLS> toHPolygon(List<Side> zoneShape) {
         return zoneShape.stream()
