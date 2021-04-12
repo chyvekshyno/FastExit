@@ -11,7 +11,7 @@ import java.util.*;
  *      [3  x   4]
  *      [5  6   7]
  */
-public class Cell {
+public class UnitCell {
 
     //region    VECTORS
     private static final int NEIGHBOURS_COUNT  = 7;
@@ -25,18 +25,18 @@ public class Cell {
     public static final int VEC_BOTTOM         = 6;
     public static final int VEC_BOTTOM_RIGHT   = 7;
 
-    private static final Cell NULL_CELL = Cell.at(IntCoord.NULL_COORD);
+    private static final UnitCell NULL_CELL = UnitCell.at(IntCoord.NULL_COORD);
     //endregion
 
     //region    Fields
     private boolean mark;
     private final IntCoord coord;
-    private List<Cell> neighbours;
+    private List<UnitCell> neighbours;
     //endregion
 
     //region    Constructors
 
-    public Cell(IntCoord coord) {
+    public UnitCell(IntCoord coord) {
         this.coord = coord;
         mark = false;
         neighbours = new ArrayList<>(Collections.nCopies(7, NULL_CELL));
@@ -58,7 +58,7 @@ public class Cell {
         return coord;
     }
 
-    public List<Cell> getNeighbours() {
+    public List<UnitCell> getNeighbours() {
         return neighbours;
     }
     //endregion
@@ -67,7 +67,7 @@ public class Cell {
         mark(true);
     }
 
-    public void meetNeighbour(Cell another, int vec) throws Exception {
+    public void meetNeighbour(UnitCell another, int vec) throws Exception {
         meetNeighbour(another, vec, true);
     }
 
@@ -85,7 +85,7 @@ public class Cell {
         }
     }
 
-    private void meetNeighbour(Cell another, int vec, boolean flag_first) throws Exception {
+    private void meetNeighbour(UnitCell another, int vec, boolean flag_first) throws Exception {
         if (neighbours.get(vec) != NULL_CELL)
             throw new Exception("Cell already has neighbour");
 
@@ -96,12 +96,12 @@ public class Cell {
     }
 
     //region    STATIC
-    public static Cell at (IntCoord coord) {
-        return new Cell(coord);
+    public static UnitCell at (IntCoord coord) {
+        return new UnitCell(coord);
     }
 
-    public static Cell at (int x, int y) {
-        return new Cell(IntCoord.at(x, y));
+    public static UnitCell at (int x, int y) {
+        return new UnitCell(IntCoord.at(x, y));
     }
     //endregion
     //endregion
