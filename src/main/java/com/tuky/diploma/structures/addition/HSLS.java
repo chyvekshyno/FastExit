@@ -1,9 +1,9 @@
 package com.tuky.diploma.structures.addition;
 
 public class HSLS {
-    public final int y;
-    public final int xL;
-    public final int xR;
+    private final int y;
+    private final int xL;
+    private final int xR;
 
     public HSLS(int y, int xL, int xR) {
         this.y = y;
