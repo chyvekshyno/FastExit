@@ -6,12 +6,14 @@ import java.util.stream.Collectors;
 
 public class Zone {
     private List<Side> sides;
+
+    private List<IntCoord> points;
+
     private List<Exit> exits;
     private int MAX_X;
     private int MIN_X;
     private int MAX_Y;
     private int MIN_Y;
-
     public Zone() {
         this.sides = null;
         this.exits = null;
@@ -33,6 +35,7 @@ public class Zone {
     public int MAX_X (){
         return MAX_X;
     }
+
     public int MIN_X () {
         return MIN_X;
     }
@@ -45,6 +48,10 @@ public class Zone {
 
     public List<Side> getShape() {
         return sides;
+    }
+
+    public List<IntCoord> getPoints() {
+        return points;
     }
 
     public List<Exit> getExits() {

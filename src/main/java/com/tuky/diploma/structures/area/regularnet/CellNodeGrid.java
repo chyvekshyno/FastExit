@@ -1,11 +1,13 @@
 package com.tuky.diploma.structures.area.regularnet;
 
 import com.tuky.diploma.structures.addition.HSLS;
-import com.tuky.diploma.structures.addition.Pair;
 import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.IntCoord;
 import com.tuky.diploma.structures.area.Side;
 import com.tuky.diploma.structures.area.Zone;
+import com.tuky.diploma.structures.graph.Graph;
+import com.tuky.diploma.structures.graph.Node;
+import com.tuky.diploma.structures.graph.Transition;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,22 +32,29 @@ import static java.lang.Math.abs;
  *
  * Start build floor from input door
  */
-public class UnitCellGrid {
+public class CellNodeGrid extends Graph {
 
     //region    FIELDS
     private final int MIN_X = 0;
     private final int MIN_Y = 0;
-    private List<List<UnitCell>> grid;
+    private List<List<UnitCellNode>> grid;
 
     //endregion
 
     //region    CONSTRUCTORS
 
-    public UnitCellGrid(IntCoord coord1, IntCoord coord2) {
+
+    public CellNodeGrid() {
+        super();
+    }
+
+    public CellNodeGrid(IntCoord coord1, IntCoord coord2) {
+        this();
         grid = cellRectangle(coord1, coord2);
     }
 
-    public UnitCellGrid(Zone zone) {
+    public CellNodeGrid(Zone zone) {
+        this();
         grid = figure(zone);
     }
 
@@ -54,105 +63,128 @@ public class UnitCellGrid {
 
     //region    METHODS
 
+    @Override
+    public void addNode(Node node) {
+        if (node instanceof UnitCellNode && !adjNodes.containsKey(node))
+            initCellNodeEntry((UnitCellNode) node);
+    }
+
+    @Override
+    public void removeNode(Node node) {
+        super.removeNode(node);
+    }
+
+    public void addTransition(Node start, Node end, int vec) throws Exception {
+        addTransition(start, end, vec, true);
+    }
+
+    private void addTransition(Node start, Node end, int vec, boolean first) throws Exception {
+        addNode(start);
+        if (adjNodes.get(start).get(vec) != null)
+            throw new Exception("Cell already has neighbour on current vector");
+        adjNodes.get(start).set(vec, new Transition(start, end));
+        if (first)
+            addTransition(end, start, UnitCellNode.vecReverse(vec), false);
+    }
+
+
+    private void initCellNodeEntry(UnitCellNode node) {
+        this.adjNodes.put(node, new ArrayList<>(Collections
+                .nCopies(UnitCellNode.NEIGHBOURS_COUNT, null)));
+    }
+
     private int getIndX(int x) { return x - MIN_X; }
     private int getIndY(int y) { return y - MIN_Y; }
 
     //region    THIS MAP GETTERS
-    public List<List<UnitCell>> getGrid() {
+    public List<List<UnitCellNode>> getGrid() {
         return grid;
     }
 
-    public UnitCell get(IntCoord coord) {
+    public UnitCellNode get(IntCoord coord) {
         return get(coord.X(), coord.Y());
     }
 
-    public UnitCell get(int x, int y) {
+    public UnitCellNode get(int x, int y) {
         return grid.get(y - MIN_Y).get(x - MIN_X);
     }
 
-    public List<List<UnitCell>> get(IntCoord coord1, IntCoord coord2) {
+    public List<List<UnitCellNode>> get(IntCoord coord1, IntCoord coord2) {
         return get(coord1, coord2, this.grid);
     }
 
-    public List<List<UnitCell>> get(int x0, int y0, int x1, int y1) {
+    public List<List<UnitCellNode>> get(int x0, int y0, int x1, int y1) {
         return get(x0, y0, x1, y1, this.grid);
     }
 
-    public List<UnitCell> getLine(int y) {
+    public List<UnitCellNode> getLine(int y) {
         return getLine(y, this.grid);
     }
-
-    public List<UnitCell> getRow(int y, int x0, int x1) {
+    public List<UnitCellNode> getRow(int y, int x0, int x1) {
         return getRow(y, x0, x1, this.grid);
     }
 
-    public List<UnitCell> getBetween(Pair<HSLS> pair){
-        return getBetween(pair, this.grid);
-    }
     //endregion
 
     //region GETTERS
-    private UnitCell get(int x, int y, List<List<UnitCell>> cellRect) {
+
+    private UnitCellNode get(int x, int y, List<List<UnitCellNode>> cellRect) {
         return cellRect.get(getIndY(y)).get(getIndX(x));
     }
 
-    private UnitCell get(IntCoord coord, List<List<UnitCell>> cellRect) {
+    private UnitCellNode get(IntCoord coord, List<List<UnitCellNode>> cellRect) {
         return get(coord.X(), coord.Y(), cellRect);
     }
 
-    private List<List<UnitCell>> get(IntCoord coord1, IntCoord coord2, List<List<UnitCell>> cellRect) {
+    private List<List<UnitCellNode>> get(IntCoord coord1, IntCoord coord2, List<List<UnitCellNode>> cellRect) {
         return get(coord1.X(), coord1.Y(), coord2.X(), coord2.Y(), cellRect);
     }
 
-    private List<List<UnitCell>> get(int x0, int y0, int x1, int y1, List<List<UnitCell>> cellRect) {
-        List<List<UnitCell>> region = new ArrayList<>();
+    private List<List<UnitCellNode>> get(int x0, int y0, int x1, int y1, List<List<UnitCellNode>> cellRect) {
+        List<List<UnitCellNode>> region = new ArrayList<>();
         for (int y = y0; y < y1; y++)
             region.add(getRow(y, x0, x1, cellRect));
 
         return region;
     }
 
-    private List<UnitCell> getLine(int y, List<List<UnitCell>> cellRect) {
+    private List<UnitCellNode> getLine(int y, List<List<UnitCellNode>> cellRect) {
         return cellRect.get(getIndY(y));
     }
-
-    private List<UnitCell> getRow(int y, int x0, int x1, List<List<UnitCell>> cellRect) {
+    private List<UnitCellNode> getRow(int y, int x0, int x1, List<List<UnitCellNode>> cellRect) {
         return getLine(y, cellRect).subList(x0, x1);
     }
 
-    private List<UnitCell> getBetween(Pair<HSLS> pair, List<List<UnitCell>> cellRect){
-        return getRow(pair.X().y(), pair.X().xL(), pair.Y().xR(), cellRect);
-    }
     //endregion
-
     //region    RECTANGLE
-    private List<List<UnitCell>> cellRectangle(int x0, int y0, int x1, int y1) {
-        UnitCell cell;
-        List<List<UnitCell>> map = new ArrayList<>();
-        List<UnitCell> cellLine = new ArrayList<>();
+
+    private List<List<UnitCellNode>> cellRectangle(int x0, int y0, int x1, int y1) {
+        UnitCellNode cell;
+        List<List<UnitCellNode>> map = new ArrayList<>();
+        List<UnitCellNode> cellLine = new ArrayList<>();
 
         try {
             //  first line
-            cell = UnitCell.at(x0, y0);
+            cell = UnitCellNode.at(x0, y0);
             cellLine.add(cell);
             for (int w = x0 + 1; w < x1; w++) {
-                cell = UnitCell.at(w, y0);
-                cell.meetNeighbour(cellLine.get(w-x0-1), UnitCell.VEC_LEFT);
+                cell = UnitCellNode.at(w, y0);
                 cellLine.add(cell);
+                addTransition(cell, cellLine.get(w-x0-1), UnitCellNode.VEC_LEFT);
             }
             map.add(cellLine);
 
             //  center lines
             for (int h = y0 + 1; h < y1; h++) {
-                cell = UnitCell.at(x0, h);
+                cell = UnitCellNode.at(x0, h);
                 cellLine = new ArrayList<>();
                 cellLine.add(cell);
                 for (int w = x0 + 1; w < x1; w++) {
-                    cell = UnitCell.at(w, h);
-                    cell.meetNeighbour(cellLine.get(w-x0-1), UnitCell.VEC_LEFT);
-                    cell.meetNeighbour(get(w-1, h-1), UnitCell.VEC_TOP_LEFT);
-                    cell.meetNeighbour(get(w, h-1), UnitCell.VEC_TOP);
+                    cell = UnitCellNode.at(w, h);
                     cellLine.add(cell);
+                    addTransition(cell, cellLine.get(w-x0-1), UnitCellNode.VEC_LEFT);
+                    addTransition(cell, get(w-1, h-1), UnitCellNode.VEC_TOP_LEFT);
+                    addTransition(cell, get(w, h-1), UnitCellNode.VEC_TOP);
                 }
                 map.add(cellLine);
             }
@@ -162,22 +194,22 @@ public class UnitCellGrid {
         return map;
     }
 
-    private List<List<UnitCell>> cellRectangle(IntCoord coord1, IntCoord coord2) {
+    private List<List<UnitCellNode>> cellRectangle(IntCoord coord1, IntCoord coord2) {
         return cellRectangle(coord1.X(), coord1.Y(), coord2.X(), coord2.Y());
     }
-
-    private List<List<UnitCell>> cellRectangle(Zone zone) {
+    private List<List<UnitCellNode>> cellRectangle(Zone zone) {
         return cellRectangle(zone.MIN_X(), zone.MIN_Y(), zone.MAX_X(), zone.MAX_Y());
     }
+
     //endregion
 
-    private List<List<UnitCell>> figure(Zone zone) {
+    private List<List<UnitCellNode>> figure(Zone zone) {
         var ET = EdgeTable(zone);
         var cellRect = cellRectangle(zone);
 
 
-        List<List<UnitCell>> cellMap = new ArrayList<>();
-        List<UnitCell> cellLine = new ArrayList<>();
+        List<List<UnitCellNode>> cellMap = new ArrayList<>();
+        List<UnitCellNode> cellLine = new ArrayList<>();
         List<HSLS> bucket;
         HSLS hsls0, hsls1;
         Iterator<HSLS> it;
@@ -190,10 +222,10 @@ public class UnitCellGrid {
                 cellLine.addAll(getRow(hsls0.y(), hsls0.xL(), hsls1.xR(), cellRect));
             }
 
-            //  remove neighbourhoods of cells NOT included to Zone
+            //  remove cells NOT included to Zone
             cellRect.get(y).forEach(cell -> {
                 if (!cellLine.contains(cell))
-                    cell.leaveAlone();
+                    removeNode(cell);
             });
 
             cellMap.set(y, cellLine);
@@ -233,16 +265,6 @@ public class UnitCellGrid {
         return ET;
     }
 
-//    private List<List<HSLS>> groupHPolygon(List<HSLS> HArray, int y_min, int y_max) {
-//        List<List<HSLS>> groups = new ArrayList<>(Collections
-//                .nCopies(y_max - y_min + 1, new ArrayList<>()));
-//
-//        for (HSLS hsls : HArray)
-//            groups.get(hsls.y()).add(hsls);
-//
-//        return groups;
-//    }
-
     private List<HSLS> toHPolygon(List<Side> zoneShape) {
         return zoneShape.stream()
                 .flatMap(side -> toHLine(side.getCoord1(), side.getCoord2()).stream())
@@ -263,7 +285,6 @@ public class UnitCellGrid {
             else            return toHLine(x1, y1, x0, y0, 1);
         }
     }
-
 
     /**
      * uses Bresenham algorithm
@@ -291,15 +312,15 @@ public class UnitCellGrid {
 
 
     //region    STATIC METHODS
-    public static UnitCellGrid of (IntCoord coord1, IntCoord coord2) {
-        return new UnitCellGrid(coord1, coord2);
+    public static CellNodeGrid of (IntCoord coord1, IntCoord coord2) {
+        return new CellNodeGrid(coord1, coord2);
     }
 
-    public static UnitCellGrid of (Zone zone) {
-        return new UnitCellGrid(zone);
+    public static CellNodeGrid of (Zone zone) {
+        return new CellNodeGrid(zone);
     }
 
-    public static UnitCellGrid of (Area area) {
+    public static CellNodeGrid of (Area area) {
         return null;
     }
     //endregion
