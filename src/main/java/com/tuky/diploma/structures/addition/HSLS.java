@@ -1,6 +1,6 @@
 package com.tuky.diploma.structures.addition;
 
-public class HSLS {
+public class HSLS implements Comparable<HSLS>{
     private final int y;
     private final int xL;
     private final int xR;
@@ -21,5 +21,14 @@ public class HSLS {
 
     public int xR() {
         return xR;
+    }
+
+    @Override
+    public int compareTo(HSLS hsls) {
+        return Integer.compare(this.xR - this.xL, hsls.xR()) - hsls.xL();
+    }
+
+    public int width() {
+        return xR - xL;
     }
 }

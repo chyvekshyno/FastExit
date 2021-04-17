@@ -35,8 +35,8 @@ import static java.lang.Math.abs;
 public class CellNodeGrid extends Graph {
 
     //region    FIELDS
-    private final int MIN_X = 0;
-    private final int MIN_Y = 0;
+    private int MIN_X;
+    private int MIN_Y;
     private List<List<UnitCellNode>> grid;
 
     //endregion
@@ -48,13 +48,19 @@ public class CellNodeGrid extends Graph {
         super();
     }
 
-    public CellNodeGrid(IntCoord coord1, IntCoord coord2) {
+    public CellNodeGrid(int x0, int y0, int x1, int y1) {
         this();
-        grid = cellRectangle(coord1, coord2);
+        initMINS(x0, y0);
+        grid = cellRectangle(x0, y0, x1, y1);
+    }
+
+    public CellNodeGrid(IntCoord coord1, IntCoord coord2) {
+        this(coord1.X(), coord1.Y(), coord2.X(), coord2.Y());
     }
 
     public CellNodeGrid(Zone zone) {
         this();
+        initMINS(zone.MIN_X(), zone.MIN_Y());
         grid = figure(zone);
     }
 
@@ -72,6 +78,19 @@ public class CellNodeGrid extends Graph {
     @Override
     public void removeNode(Node node) {
         super.removeNode(node);
+    }
+
+    @Override
+    protected void removeRelationsOf(Node node) {
+        adjNodes.get(node).stream()
+                .filter(Objects::nonNull)
+                .map(Transition::getEnd)
+                .map(adjNodes::get)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(tr -> tr.getEnd() == node)
+                .forEach(tr -> tr = null);
     }
 
     public void addTransition(Node start, Node end, int vec) throws Exception {
@@ -95,6 +114,11 @@ public class CellNodeGrid extends Graph {
 
     private int getIndX(int x) { return x - MIN_X; }
     private int getIndY(int y) { return y - MIN_Y; }
+
+    private void initMINS(int x, int y) {
+        MIN_X = x;
+        MIN_Y = y;
+    }
 
     //region    THIS MAP GETTERS
     public List<List<UnitCellNode>> getGrid() {
@@ -152,13 +176,13 @@ public class CellNodeGrid extends Graph {
         return cellRect.get(getIndY(y));
     }
     private List<UnitCellNode> getRow(int y, int x0, int x1, List<List<UnitCellNode>> cellRect) {
-        return getLine(y, cellRect).subList(x0, x1);
+        return getLine(y, cellRect).subList(getIndX(x0), getIndX(x1) + 1);
     }
 
     //endregion
     //region    RECTANGLE
 
-    private List<List<UnitCellNode>> cellRectangle(int x0, int y0, int x1, int y1) {
+    public List<List<UnitCellNode>> cellRectangle(int x0, int y0, int x1, int y1) {
         UnitCellNode cell;
         List<List<UnitCellNode>> map = new ArrayList<>();
         List<UnitCellNode> cellLine = new ArrayList<>();
@@ -167,7 +191,7 @@ public class CellNodeGrid extends Graph {
             //  first line
             cell = UnitCellNode.at(x0, y0);
             cellLine.add(cell);
-            for (int w = x0 + 1; w < x1; w++) {
+            for (int w = x0 + 1; w < x1+1; w++) {
                 cell = UnitCellNode.at(w, y0);
                 cellLine.add(cell);
                 addTransition(cell, cellLine.get(w-x0-1), UnitCellNode.VEC_LEFT);
@@ -175,7 +199,7 @@ public class CellNodeGrid extends Graph {
             map.add(cellLine);
 
             //  center lines
-            for (int h = y0 + 1; h < y1; h++) {
+            for (int h = y0 + 1; h < y1+1; h++) {
                 cell = UnitCellNode.at(x0, h);
                 cellLine = new ArrayList<>();
                 cellLine.add(cell);
@@ -183,9 +207,15 @@ public class CellNodeGrid extends Graph {
                     cell = UnitCellNode.at(w, h);
                     cellLine.add(cell);
                     addTransition(cell, cellLine.get(w-x0-1), UnitCellNode.VEC_LEFT);
-                    addTransition(cell, get(w-1, h-1), UnitCellNode.VEC_TOP_LEFT);
-                    addTransition(cell, get(w, h-1), UnitCellNode.VEC_TOP);
+                    addTransition(cell, get(w-1, h-1, map)  , UnitCellNode.VEC_TOP_LEFT);
+                    addTransition(cell, get(w, h-1, map)    , UnitCellNode.VEC_TOP);
+                    addTransition(cell, get(w+1, h-1, map)  , UnitCellNode.VEC_TOP_RIGHT);
                 }
+                cell = UnitCellNode.at(x1, h);
+                cellLine.add(cell);
+                addTransition(cell, cellLine.get(x1-x0-1), UnitCellNode.VEC_LEFT);
+                addTransition(cell, get(x1-1, h-1, map)  , UnitCellNode.VEC_TOP_LEFT);
+                addTransition(cell, get(x1, h-1, map)    , UnitCellNode.VEC_TOP);
                 map.add(cellLine);
             }
         } catch (Exception e) {
@@ -207,7 +237,6 @@ public class CellNodeGrid extends Graph {
         var ET = EdgeTable(zone);
         var cellRect = cellRectangle(zone);
 
-
         List<List<UnitCellNode>> cellMap = new ArrayList<>();
         List<UnitCellNode> cellLine = new ArrayList<>();
         List<HSLS> bucket;
@@ -223,12 +252,12 @@ public class CellNodeGrid extends Graph {
             }
 
             //  remove cells NOT included to Zone
-            cellRect.get(y).forEach(cell -> {
+            for (var cell : cellRect.get(y))
                 if (!cellLine.contains(cell))
                     removeNode(cell);
-            });
 
-            cellMap.set(y, cellLine);
+
+            cellMap.add(cellLine);
             cellLine.clear();
         }
 
@@ -240,29 +269,60 @@ public class CellNodeGrid extends Graph {
     }
 
     private List<List<HSLS>> EdgeTable (List<HSLS> HPolygon, int height) {
+        List<List<HSLS>> ET = new ArrayList<>(height);
+        for (int k = 0; k < height; k++)
+            ET.add(new ArrayList<>());
+
+        HSLS prev2 = HPolygon.remove(0);
         HSLS prev = HPolygon.remove(0);
         HSLS curr = HPolygon.remove(0);
-        HSLS next;
+        HSLS next = HPolygon.get(HPolygon.size()-1);
+        HSLS first = HPolygon.get(HPolygon.size()-2);
 
-        List<List<HSLS>> ET = new ArrayList<>(Collections.nCopies(height, new ArrayList<>()));
-        ET.get(getIndY(prev.y())).add(prev);
-        ET.get(getIndY(curr.y())).add(curr);
+        //process first n second hsls
+        processET(first, next, prev2, prev, ET);
+        processET(next, prev2, prev, curr, ET);
+
+        first = prev2;
+
         for (HSLS hel : HPolygon) {
             next = hel;
-            if     ((prev.y() > curr.y() && next.y() < curr.y()) ||
-                    (prev.y() < curr.y() && next.y() > curr.y())) {
-                ET.get(getIndY(curr.y())).add(curr);
-            } else if  ((prev.y() > curr.y() && next.y() > curr.y()) ||
-                        (prev.y() < curr.y() && next.y() < curr.y())) {
-                ET.get(getIndY(curr.y())).add(curr);
-                ET.get(getIndY(curr.y())).add(curr);
-            }
+            processET(prev2, prev, curr, next, ET);
+
+            prev2 = prev;
             prev = curr;
             curr = next;
         }
 
-        ET.forEach(list -> list.sort(Comparator.comparing(HSLS::xL)));
+        //  process last hsls
+        processET(prev2, prev, curr, first, ET);
+
+        ET.forEach(list -> list.sort(Comparator.comparing(HSLS::xL)
+                                        .thenComparing(HSLS::xR)));
         return ET;
+    }
+
+    private void processET (HSLS prev2, HSLS prev, HSLS curr, HSLS next, List<List<HSLS>> ET) {
+
+        ET.get(getIndY(curr.y())).add(curr);
+        if (prev.y() == curr.y())
+            if (curr.y() == next.y() ||
+                    (prev2.y() != curr.y() && prev2.y() != next.y()))
+                ET.get(getIndY(curr.y())).add(curr);
+
+
+//        if (curr.y() == next.y()) {
+//            if (curr.y() == prev.y()) {
+//                ET.get(getIndY(curr.y())).add(curr);
+//                ET.get(getIndY(curr.y())).add(curr);
+//            } else if (curr.width() >= next.width()) {
+//                ET.get(getIndY(curr.y())).add(curr);
+//            }
+//        } else if (curr.y() == prev.y()) {
+//            if (curr.width() > prev.width()) {
+//                ET.get(getIndY(curr.y())).add(curr);
+//            }
+//        } else  ET.get(getIndY(curr.y())).add(curr);
     }
 
     private List<HSLS> toHPolygon(List<Side> zoneShape) {
@@ -277,34 +337,96 @@ public class CellNodeGrid extends Graph {
         int x1 = coord2.X();
         int y1 = coord2.Y();
 
-        if (x0 < x1) {
-            if (y0 < y1)    return toHLine(x0, y0, x1, y1, 1);
-            else            return toHLine(x0, y0, x1, y1, -1);
+        if (y0 == y1) {
+            if      (x0 < x1)   return new ArrayList<>() {{  add(new HSLS(y0, x0, x1));  }};
+            else                return new ArrayList<>() {{  add(new HSLS(y0, x1, x0));  }};
+        }
+
+        if (y0 < y1) {
+            if      (x0 < x1) {
+                if  (x1-x0 > y1-y0)     return toHLineLow (x0, y0, x1, y1, +1, false);
+                else                    return toHLineHigh(x0, y0, x1, y1, +1, false);
+            }
+            else if (x0 > x1) {
+                if (x0-x1 > y1-y0)      return toHLineLow (x1, y1, x0, y0, -1, true);
+                else                    return toHLineHigh(x0, y0, x1, y1, -1, false);
+            }
+            else                        return new ArrayList<>() {{
+                                            for (int y = y0; y < y1 + 1; y++)
+                                                add(new HSLS(y, x0, x1));
+                                        }};
         } else {
-            if (y0 < y1)    return toHLine(x1, y1, x0, y0, -1);
-            else            return toHLine(x1, y1, x0, y0, 1);
+            if      (x0 < x1) {
+                if  (x1-x0 > y0-y1)     return toHLineLow (x0, y0, x1, y1, -1, false);
+                else                    return toHLineHigh(x1, y1, x0, y0, -1, true);
+            }
+            else if (x0 > x1) {
+                if (x0-x1 > y1-y0)      return toHLineLow (x1, y1, x0, y0, +1, true);
+                else                    return toHLineHigh(x1, y1, x0, y0, +1, true);
+            }
+            else                        return new ArrayList<>() {{
+                                            for (int y = y0; y > y1 - 1; y--)
+                                                add(new HSLS(y, x0, x1));
+                                        }};
         }
     }
 
     /**
      * uses Bresenham algorithm
      */
-    private List<HSLS> toHLine(int x0, int y0, int x1, int y1, int y_step) {
-        int dx = x1 - x0;
-        int D = 2 * (y1 - y0) * y_step;
-        int error = D - dx;
+    private List<HSLS> toHLineLow(int x0, int y0, int x1, int y1, int y_step, boolean rev) {
+        int _2dy = y1 - y0;
+        int _2dx = x1 - x0;
+        int errD = 2 * _2dy * y_step;
+        int err = errD - _2dx;
 
         List<HSLS> HSLSArr = new ArrayList<>();
-        for (int xR = x0, xL = x0, y = y0; xR < x1; xR++) {
-            error += D;
-            if (error >= 0){
-                HSLSArr.add(new HSLS(y, xL, x0));
-                error -= 2 * dx;
-
+        int  xL = x0;
+        int y = y0;
+        boolean flag = false;
+        for (int xR = x0; xR < x1 + 1; xR++) {
+            flag = false;
+            if (err >= 0){
+                err -= 2 * _2dx;
+                HSLSArr.add(new HSLS(y, xL, xR));
                 y += y_step;
                 xL = xR + 1;
+                flag = true;
             }
+            err += errD;
         }
+        if (!flag)
+            HSLSArr.add(new HSLS(y, xL, x1));
+
+        if (rev)
+            Collections.reverse(HSLSArr);
+
+        return HSLSArr;
+    }
+
+    /**
+     * uses Bresenham algorithm swapped coord dims
+     */
+    private List<HSLS> toHLineHigh(int x0, int y0, int x1, int y1, int x_step, boolean rev) {
+        int _2dy = y1 - y0;
+        int _2dx = x1 - x0;
+        int errD = 2 * _2dx * x_step;
+        int err = errD - _2dy;
+
+        List<HSLS> HSLSArr = new ArrayList<>();
+        int x = x0;
+        for (int y = y0; y < y1 + 1; y++) {
+            HSLSArr.add(new HSLS(y, x, x));
+            if (err >= 0){
+                err -= 2 * _2dy;
+                x += x_step;
+            }
+            err += errD;
+        }
+
+        if (rev)
+            Collections.reverse(HSLSArr);
+
         return HSLSArr;
     }
 

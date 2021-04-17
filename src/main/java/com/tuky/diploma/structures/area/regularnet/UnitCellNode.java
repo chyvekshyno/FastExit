@@ -15,7 +15,7 @@ import java.util.*;
 public class UnitCellNode extends Node {
 
     //region    VECTORS
-    public static final int NEIGHBOURS_COUNT  = 7;
+    public static final int NEIGHBOURS_COUNT  = 8;
 
     public static final int VEC_TOP_LEFT       = 0;
     public static final int VEC_TOP            = 1;
@@ -46,18 +46,16 @@ public class UnitCellNode extends Node {
     //region    Methods
 
     public static int vecReverse(int vec) {
-        return NEIGHBOURS_COUNT - vec;
+        return NEIGHBOURS_COUNT - vec - 1;
     }
 
-    //region    Getter n Setter
-//    public IntCoord getCoord() {
-//        return coord;
-//    }
-//
+    public IntCoord getCoord() {
+        return coord;
+    }
+
 //    public List<UnitCellNode> getNeighbours() {
 //        return neighbours;
 //    }
-//    //endregion
 //
 //    public void meetNeighbour(UnitCellNode another, int vec) throws Exception {
 //        meetNeighbour(another, vec, true);

@@ -4,26 +4,27 @@
     {
       "zoneName" : "room0",
       "shape" : [
-        { "type" : "l", "coord" : [0, 0]   },
-        { "type" : "l", "coord" : [5, 0]   },
-        { "type" : "l", "coord" : [5, 1]   },
-        { "type" : "e", "coord" : [5, 3]   },
-        { "type" : "l", "coord" : [5, 5]   },
-        { "type" : "l", "coord" : [0, 5]   },
-        { "type" : "l", "coord" : [0, 0]   },
+        { "type" : "l", "coord" : [50, 10]   },
+        { "type" : "l", "coord" : [250, 10]   },
+        { "type" : "l", "coord" : [250, 110]   },
+        { "type" : "e", "coord" : [250, 130]   },
+        { "type" : "l", "coord" : [200, 150]   },
+        { "type" : "l", "coord" : [50, 150]   },
+        { "type" : "l", "coord" : [50, 10]   },
       ]
     }, {
       "zoneName" : "room1",
       "shape" : [
-        { "type" : "l", "coord" : [0, 0]   },
-        { "type" : "l", "coord" : [8, 0]   },
-        { "type" : "e", "coord" : [8, 2]   },
-        { "type" : "l", "coord" : [8, 8]   },
-        { "type" : "l", "coord" : [0, 8]   },
-        { "type" : "l", "coord" : [0, 0]   }
+        { "type" : "e", "coord" : [250, 110]   },
+        { "type" : "e", "coord" : [250, 130]   },
+        { "type" : "l", "coord" : [500, 130]   },
+        { "type" : "l", "coord" : [500, 250]   },
+        { "type" : "l", "coord" : [650, 250]   },
+        { "type" : "l", "coord" : [650, 110]   },
+        { "type" : "l", "coord" : [250, 110]   }
       ]
     } ],
   "exits" : [
-    [0, 0, 1, 0]
+    [0, 0, 0, 0]
   ]
 }

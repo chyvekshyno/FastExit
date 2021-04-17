@@ -25,5 +25,9 @@ public class Area {
         }
     }
 
+    public List<Zone> getZones() {
+        return zones;
+    }
+
     public void build() {}
 }
