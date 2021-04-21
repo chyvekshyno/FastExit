@@ -5,51 +5,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Graph {
-    protected final Map<Node, List<Transition>> adjNodes;
+public class Graph<N extends Node<? extends Comparable<?>>> {
+    protected final Map<N, List<Transition<N>>> adjNodes;
 
 
     public Graph() {
         adjNodes = new HashMap<>();
     }
 
-    public Graph(Map<Node, List<Transition>> adjNodes) {
+    public Graph(Map<N, List<Transition<N>>> adjNodes) {
         this.adjNodes = adjNodes;
     }
 
-    public Map<Node, List<Transition>> getAdjNodes() {
+    public Map<N, List<Transition<N>>> getAdjTable() {
         return adjNodes;
     }
 
-    public void addNode(Node node) {
+    public void addNode(N node) {
         adjNodes.putIfAbsent(node, new ArrayList<>());
     }
 
-    public void removeNode(Node node) {
+    public void removeNode(N node) {
         if (adjNodes.containsKey(node)) {
             removeRelationsOf(node);
             adjNodes.remove(node);
         }
     }
 
-    public void addTransition(Node start, Node end) {
+    public void addTransition(N start, N end) {
         if (adjNodes.containsKey(start)) {
-            adjNodes.get(start).add(new Transition(start, end));
+            adjNodes.get(start).add(new Transition<N>(start, end));
         } else {
             adjNodes.put(start, new ArrayList<>() {{
-                add(new Transition(start, end));
+                add(new Transition<N>(start, end));
             }});
         }
     }
 
 
-    public boolean removeTransition(Node start, Node end) {
+    public boolean removeTransition(N start, N end) {
         return adjNodes.get(start)
-                .removeIf(tr -> tr.equals(new Transition(start, end)));
+                .removeIf(tr -> tr.equals(new Transition<N>(start, end)));
     }
 
-    protected void removeRelationsOf(Node node) {
-        for (List<Transition> list : adjNodes.values()) {
+    protected void removeRelationsOf(N node) {
+        for (List<Transition<N>> list : adjNodes.values()) {
             list.removeIf(tr -> tr.getEnd() == node);
         }
     }

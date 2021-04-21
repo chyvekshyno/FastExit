@@ -1,16 +1,11 @@
 package com.tuky.diploma.visual;
 
-import com.tuky.diploma.structures.area.Area;
-import com.tuky.diploma.structures.area.IntCoord;
-import com.tuky.diploma.structures.area.Side;
-import com.tuky.diploma.structures.area.Zone;
-import com.tuky.diploma.structures.area.regularnet.UnitCellNode;
-import javafx.scene.Group;
-import javafx.scene.Scene;
+import com.tuky.diploma.structures.area.*;
+import com.tuky.diploma.structures.graph.NodeMoore2D;
+import com.tuky.diploma.structures.graph.Node2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +21,16 @@ public class AreaFX {
         return polygon;
     }
 
+    public static List<Double> toJavaFXPathPoints(List<Node2D<Double, Integer>> nodes) {
+        List<Double> points = new ArrayList<>();
+        for (var node : nodes) {
+            points.add(node.getCoord().X() + 0.5);
+            points.add(node.getCoord().Y() + 0.5);
+        }
+
+        return points;
+    }
+
     private static List<Double> PolygonPoints(Zone zone) {
         List<Double> points = new ArrayList<>();
         for (Side side : zone.getShape()) {
@@ -35,7 +40,7 @@ public class AreaFX {
         return points;
     }
 
-    public static Rectangle toJavaFXUnitSquare(UnitCellNode cell) {
+    public static Rectangle toJavaFXUnitSquare(NodeMoore2D<Double, Integer> cell) {
         return new Rectangle(cell.getCoord().X(), cell.getCoord().Y(), 1, 1);
     }
 }

@@ -3,25 +3,31 @@ package com.tuky.diploma.structures.graph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node implements Comparable<Node> {
-    private int value;
+public class Node<V extends Comparable<V>> implements Comparable<Node<V>> {
+    private V value;
 
-    public Node() { }
+    public Node() {
+        value = null;
+    }
 
-    public Node(int value) {
+    public Node(V value) {
         this.value = value;
     }
 
-    public int getValue() {
+    public V getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(V value) {
         this.value = value;
     }
 
+    public int compareTo(V value) {
+        return this.value.compareTo(value);
+    }
+
     @Override
-    public int compareTo(Node node) {
-        return Integer.compare(this.value, node.getValue());
+    public int compareTo(Node<V> another) {
+        return value.compareTo(another.value);
     }
 }

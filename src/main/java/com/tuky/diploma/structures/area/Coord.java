@@ -9,6 +9,6 @@ public class Coord <T extends Number> extends Pair<T> {
     }
 
     public static <T extends Number> Coord<T> at(T x, T y) {
-        return new Coord<T>(x, y);
+        return new Coord<>(x, y);
     }
 }

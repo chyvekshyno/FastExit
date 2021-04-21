@@ -25,10 +25,22 @@ public class HSLS implements Comparable<HSLS>{
 
     @Override
     public int compareTo(HSLS hsls) {
-        return Integer.compare(this.xR - this.xL, hsls.xR()) - hsls.xL();
+        return Integer.compare(this.xR - this.xL, hsls.xR() - hsls.xL());
     }
 
     public int width() {
         return xR - xL;
+    }
+
+    public boolean isLower(HSLS another) {
+        return this.compareTo(another) < 0;
+    }
+
+    public boolean isBigger(HSLS another) {
+        return this.compareTo(another) > 0;
+    }
+
+    public boolean isEqual(HSLS another) {
+        return this.compareTo(another) == 0;
     }
 }

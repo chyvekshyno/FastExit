@@ -1,4 +1,4 @@
-package com.tuky.diploma;
+package com.tuky.diploma.visual;
 
 import com.tuky.diploma.tests.JavaFXAreaDrawingTest;
 import javafx.application.Application;
