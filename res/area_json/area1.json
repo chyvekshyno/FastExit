@@ -1,0 +1,20 @@
+{
+  "areaName" : "area0",
+  "zones" : [
+    {
+      "zoneName" : "room0",
+      "shape" : [
+        { "type" : "l", "coord" : [10, 10]    },
+        { "type" : "l", "coord" : [10, 50]    },
+        { "type" : "l", "coord" : [50, 50]   },
+        { "type" : "l", "coord" : [50, 70]  },
+        { "type" : "l", "coord" : [80, 70]  },
+        { "type" : "e", "coord" : [80, 10]   },
+        { "type" : "e", "coord" : [10, 10]    }
+      ]
+    }
+  ],
+  "exits" : [
+    [0, 0, 0, 0]
+  ]
+}
