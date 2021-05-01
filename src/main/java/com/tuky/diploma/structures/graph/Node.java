@@ -1,8 +1,5 @@
 package com.tuky.diploma.structures.graph;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Node<V extends Comparable<V>> implements Comparable<Node<V>> {
     private V value;
 

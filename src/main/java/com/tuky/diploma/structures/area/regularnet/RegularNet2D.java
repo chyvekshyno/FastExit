@@ -1,6 +1,7 @@
 package com.tuky.diploma.structures.area.regularnet;
 
 import com.tuky.diploma.structures.addition.HSLS;
+import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.IntCoord;
 import com.tuky.diploma.structures.area.Side;
 import com.tuky.diploma.structures.area.Zone;
@@ -8,6 +9,7 @@ import com.tuky.diploma.structures.graph.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Create cell map from JSON file.
@@ -27,38 +29,55 @@ import java.util.stream.Collectors;
  *
  * Start build floor from input door
  */
-public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integer>>
+public abstract class RegularNet2D
+        <N extends Node2D<? extends Comparable<?>, Integer>>
         extends Graph<N> {
 
     //region    FIELDS
-    private int MIN_X;
-    private int MIN_Y;
-    private List<List<N>> grid;
-    private Class<N> nClass;
+    protected int MIN_X;
+    protected int MIN_Y;
+    protected int MAX_X;
+    protected int MAX_Y;
+    protected List<List<N>> grid;
+    protected final double len;
 
     //endregion
 
     //region    CONSTRUCTORS
-
-
-    public RegularNet() {
+    public RegularNet2D(double len) {
         super();
+        this.len = len;
     }
 
-    public RegularNet(int x0, int y0, int x1, int y1) {
-        this();
+    public RegularNet2D(int x0, int y0, int x1, int y1, double len) {
+        this(len);
         initMINS(x0, y0);
         grid = cellRectangle(x0, y0, x1, y1);
     }
 
-    public RegularNet(IntCoord coord1, IntCoord coord2) {
-        this(coord1.X(), coord1.Y(), coord2.X(), coord2.Y());
+    public RegularNet2D(IntCoord coord1, IntCoord coord2, double len) {
+        this(coord1.X(), coord1.Y(), coord2.X(), coord2.Y(), len);
     }
 
-    public RegularNet(Zone zone) {
-        this();
+    public RegularNet2D(Zone zone) {
+        this(zone.getLen());
         initMINS(zone.MIN_X(), zone.MIN_Y());
-        grid = figure(zone);
+        grid = figure(zone, cellRectangle(zone));
+    }
+
+    public RegularNet2D(Area area) {
+        this(area.getLen());
+        MIN_X = area.getZones().stream()
+                .mapToInt(Zone::MIN_X).min().orElse(0);
+        MIN_Y = area.getZones().stream()
+                .mapToInt(Zone::MIN_Y).min().orElse(0);
+        MAX_X = area.getZones().stream()
+                .mapToInt(Zone::MAX_X).max().orElse(0);
+        MAX_Y = area.getZones().stream()
+                .mapToInt(Zone::MAX_Y).max().orElse(0);
+
+        grid = figure(area);
+
     }
 
     //endregion
@@ -69,11 +88,6 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
     public void addNode(N node) {
         if (node != null && !adjNodes.containsKey(node))
             initCellNodeEntry(node);
-    }
-
-    @Override
-    public void removeNode(N node) {
-        super.removeNode(node);
     }
 
     @Override
@@ -90,16 +104,20 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
     }
 
     public void addTransition(N start, N end, int vec) throws Exception {
-        addTransition(start, end, vec, true);
+        addTransition(start, end, vec, true, 1);
     }
 
-    private void addTransition(N start, N end, int vec, boolean first) throws Exception {
+    public void addTransition(N start, N end, int vec, double weight) throws Exception {
+        addTransition(start, end, vec, true, weight);
+    }
+
+    private void addTransition(N start, N end, int vec, boolean first, double weight) throws Exception {
         addNode(start);
         if (adjNodes.get(start).get(vec) != null)
             throw new Exception("Cell already has neighbour on current vector");
-        adjNodes.get(start).set(vec, new Transition(start, end));
+        adjNodes.get(start).set(vec, new Transition<>(start, end, weight));
         if (first)
-            addTransition(end, start, NodeMoore2D.vecReverse(vec), false);
+            addTransition(end, start, Moore2D.vecReverse(vec), false, weight);
     }
 
 
@@ -108,19 +126,18 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
                 .nCopies(NodeMoore2D.NEIGHBOURS_COUNT, null)));
     }
 
+    public double getLen() {
+        return len;
+    }
+
     private int getIndX(int x) { return x - MIN_X; }
     private int getIndY(int y) { return y - MIN_Y; }
-
     private void initMINS(int x, int y) {
         MIN_X = x;
         MIN_Y = y;
     }
 
     //region    THIS GRID MAP GETTERS
-    public N get(IntCoord coord) {
-        return get(coord.X(), coord.Y());
-    }
-
     public N get(int x, int y) {
         return grid.get(y - MIN_Y)
                 .stream()
@@ -157,6 +174,7 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
     }
 
     protected List<N> getRowAtRect(int y, int x0, int x1, List<List<N>> cellRect) {
+        if (x0 > x1)   return new ArrayList<>();
         return getLine(y, cellRect).subList(getIndX(x0), getIndX(x1) + 1);
     }
 
@@ -191,39 +209,72 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
 
     //region    ZONE BUILDING
 
-    private List<List<N>> figure(Zone zone) {
-        var ET = EdgeTable(zone);
-        var cellRect = cellRectangle(zone);
+    private List<List<N>> figure(Area area) {
+        var cellRect = cellRectangle(MIN_X, MIN_Y, MAX_X, MAX_Y);
+
+        List<List<List<N>>> figures = new ArrayList<>();
+
+        for (var zone : area.getZones())
+            figures.add(figure(zone, cellRect));
+
 
         List<List<N>> cellMap = new ArrayList<>();
+
         List<N> cellLine = new ArrayList<>();
-        List<HSLS> bucket;
-        HSLS hsls0, hsls1;
-        for (int y = 0; y < ET.size(); y++) {
-            bucket = ET.get(y);
 
-            for (int i = 0; i < bucket.size(); i++) {
-                hsls0 = bucket.get(i++);
-                hsls1 = bucket.get(i);
-                cellLine.addAll(getRowAtRect(hsls0.y(), hsls0.xL(), hsls1.xR(), cellRect));
-            }
+        for (int y = MIN_Y; y < MAX_Y + 1; y++) {
+            for (var fig : figures)
+                cellLine.addAll(fig.get(getIndY(y)));
 
-
-            //  remove cells NOT included to Zone
-            for (var cell : cellRect.get(y))
+            for (var cell : cellRect.get(getIndY(y)))
                 if (!cellLine.contains(cell))
                     removeNode(cell);
 
             cellMap.add(cellLine.stream()
-                        .distinct()
-                        .collect(Collectors.toList()));
+                    .distinct()
+                    .collect(Collectors.toList()));
+
             cellLine.clear();
         }
+
+
+
+        return cellMap;
+
+    }
+
+    private List<List<N>> figure(Zone zone, List<List<N>> cellRect) {
+        var ET = EdgeTable(zone);
+        var ExitHSLS = toHPolygon(zone.getExits());
+
+        List<List<N>> cellMap = new ArrayList<>();
+        List<N> cellLine = new ArrayList<>();
+        HSLS hsls0, hsls1;
+        for (List<HSLS> bucket : ET) {
+
+            for (int i = 0; i < bucket.size(); i++) {
+                hsls0 = bucket.get(i++);
+                hsls1 = bucket.get(i);
+                cellLine.addAll(getRowAtRect(hsls0.y(), hsls0.xR() + 1, hsls1.xL() - 1, cellRect));
+            }
+
+            cellMap.add(cellLine.stream()
+                    .distinct()
+                    .collect(Collectors.toList()));
+
+            cellLine.clear();
+        }
+
+        for (var hsls : ExitHSLS)
+            cellMap.get(getIndY(hsls.y()))
+                    .addAll(getRowAtRect(hsls.y(), hsls.xL(), hsls.xR(), cellRect));
+
+
         return cellMap;
     }
 
     private List<List<HSLS>> EdgeTable (Zone zone) {
-        return EdgeTable(toHPolygon(zone.getShape()), zone.MAX_Y() - zone.MIN_Y() + 1);
+        return EdgeTable(toHPolygon(zone.getShape()), MAX_Y - MIN_Y + 1);
     }
 
     private List<List<HSLS>> EdgeTable (List<HSLS> HPolygon, int height) {
@@ -276,7 +327,7 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
         ET.get(getIndY(curr.y())).add(curr);
     }
 
-    private List<HSLS> toHPolygon(List<Side> zoneShape) {
+    private List<HSLS> toHPolygon(List<? extends Side> zoneShape) {
         return zoneShape.stream()
                 .flatMap(side -> toHLine(side.getCoord1(), side.getCoord2()).stream())
                 .collect(Collectors.toList());
@@ -382,6 +433,5 @@ public abstract class RegularNet<N extends Node2D<? extends Comparable<?>, Integ
     }
 
     //endregion
-
     //endregion
 }

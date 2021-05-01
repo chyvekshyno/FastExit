@@ -3,6 +3,7 @@
   "zones" : [
     {
       "zoneName" : "room0",
+      "len" : 1.0,
       "shape" : [
         { "type" : "l", "coord" : [50, 10]   },
         { "type" : "l", "coord" : [250, 10]   },
@@ -14,6 +15,7 @@
       ]
     }, {
       "zoneName" : "room1",
+      "len" : 1.0,
       "shape" : [
         { "type" : "e", "coord" : [250, 110]   },
         { "type" : "e", "coord" : [250, 130]   },

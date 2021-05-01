@@ -16,6 +16,7 @@ public class AreaJSONParser {
     public static final String TAG_ZONES        = "zones";
     public static final String TAG_ZONE_NAME    = "zoneName";
     public static final String TAG_SHAPE        = "shape";
+    public static final String TAG_LEN          = "len";
     public static final String TAG_POLYGON_TYPE = "type";
     public static final String TAG_EXITS        = "exits";
     public static final String TAG_COORD        = "coord";
@@ -29,7 +30,7 @@ public class AreaJSONParser {
         String areaName = (String) root.get(TAG_AREA_NAME);
 
         return new Area(parseZones((JSONArray) root.get(TAG_ZONES))
-                , parseExitsConnect((JSONArray) root.get(TAG_EXITS)));
+                , parseExitsConnect((JSONArray) root.get(TAG_EXITS)), 1);
     }
 
     /**
@@ -58,9 +59,11 @@ public class AreaJSONParser {
 
         String zoneName = (String) object.get(TAG_ZONE_NAME);
         JSONArray polygonsJsonArr = (JSONArray) object.get(TAG_SHAPE);
+        double len = (Double) object.get(TAG_LEN);
 
-        return new Zone(parseShape(polygonsJsonArr));
+        return new Zone(parseShape(polygonsJsonArr), len);
     }
+
 
     private static List<Side> parseShape(JSONArray shape) {
         JSONObject jsonObj = (JSONObject) shape.remove(0);

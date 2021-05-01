@@ -1,39 +1,48 @@
 package com.tuky.diploma.structures.cellular;
 
-import com.tuky.diploma.structures.graph.Graph;
-import com.tuky.diploma.structures.graph.Node;
+import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
 import com.tuky.diploma.structures.graph.Node2D;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class CellularAutomata
-        <V extends Number & Comparable<V>,  N extends Node2D<V, Integer>> {
+        <N extends Node2D<Double, Integer> & CellularAutomaton> {
 
     private int generation;
 
-    public CellularAutomata() {
+    protected final RegularNet2D<N> grid;
+
+    public CellularAutomata(RegularNet2D<N> grid) {
         this.generation = 0;
+        this.grid = grid;
     }
 
-    public int getGeneration() {
+    public RegularNet2D<N> getGrid() {
+        return grid;
+    }
+
+    public final int getGeneration() {
         return generation;
     }
 
     public void nextState() {
-        Map<N, V> newStates = new HashMap<>();
+        Map<N, Double> newStates = new HashMap<>();
 
-        for (N cell: getCells())
+        for (N cell: getGrid().getAdjTable().keySet())
             newStates.put(cell, nextCellState(cell));
 
-        for (N cell: getCells())
+        for (N cell: getGrid().getAdjTable().keySet()) {
             cell.setValue(newStates.get(cell));
+            cell.next(cell.getValue());
+        }
 
-        generation++;
+        nextGen();
     }
 
-    protected abstract Collection<N> getCells();
+    protected abstract double nextCellState(N cell);
 
-    protected abstract V nextCellState(N cell);
+    protected final void nextGen() {
+        generation++;
+    }
 }

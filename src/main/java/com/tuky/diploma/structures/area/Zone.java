@@ -5,21 +5,25 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class Zone {
+
     private List<Side> sides;
-
-    private List<IntCoord> points;
-
     private List<Exit> exits;
+
     private int MAX_X;
     private int MIN_X;
     private int MAX_Y;
     private int MIN_Y;
-    public Zone() {
+
+    private final double len;
+
+    public Zone(double len) {
+        this.len = len;
         this.sides = null;
         this.exits = null;
     }
 
-    public Zone(List<Side> sides) {
+    public Zone(List<Side> sides, double len) {
+        this.len = len;
         setShape(sides);
     }
 
@@ -48,10 +52,6 @@ public class Zone {
 
     public List<Side> getShape() {
         return sides;
-    }
-
-    public List<IntCoord> getPoints() {
-        return points;
     }
 
     public List<Exit> getExits() {
@@ -87,5 +87,9 @@ public class Zone {
         return sides.stream()
                 .mapToInt(Side::MIN_Y).min()
                 .orElseThrow(NoSuchElementException::new);
+    }
+
+    public double getLen() {
+        return len;
     }
 }

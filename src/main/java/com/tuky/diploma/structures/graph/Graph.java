@@ -34,10 +34,10 @@ public class Graph<N extends Node<? extends Comparable<?>>> {
 
     public void addTransition(N start, N end) {
         if (adjNodes.containsKey(start)) {
-            adjNodes.get(start).add(new Transition<N>(start, end));
+            adjNodes.get(start).add(new Transition<>(start, end));
         } else {
             adjNodes.put(start, new ArrayList<>() {{
-                add(new Transition<N>(start, end));
+                add(new Transition<>(start, end));
             }});
         }
     }
@@ -45,7 +45,7 @@ public class Graph<N extends Node<? extends Comparable<?>>> {
 
     public boolean removeTransition(N start, N end) {
         return adjNodes.get(start)
-                .removeIf(tr -> tr.equals(new Transition<N>(start, end)));
+                .removeIf(tr -> tr.equals(new Transition<>(start, end)));
     }
 
     protected void removeRelationsOf(N node) {

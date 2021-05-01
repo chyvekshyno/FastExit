@@ -3,10 +3,12 @@ package com.tuky.diploma.structures.area;
 import java.util.List;
 
 public class Area {
-    private List<Zone> zones;
+    private final double len;
+    private final List<Zone> zones;
 
-    public Area(List<Zone> zones, List<List<Integer>> connections){
+    public Area(List<Zone> zones, List<List<Integer>> connections, double len){
         this.zones = zones;
+        this.len = len;
         connectAll(connections);
     }
 
@@ -30,4 +32,8 @@ public class Area {
     }
 
     public void build() {}
+
+    public double getLen() {
+        return len;
+    }
 }
