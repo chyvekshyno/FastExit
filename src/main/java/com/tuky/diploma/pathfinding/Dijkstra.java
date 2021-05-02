@@ -7,9 +7,34 @@ import java.util.*;
 
 public class Dijkstra {
 
-    public static <N extends Node2D<?,?>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+        return new Dijkstra()._path(graph, source, target);
+    }
 
-        //  init data structures
+    public static <N extends Node2D<?,Integer>, G extends Graph<N>> Map<N, Double> distTree (G graph, N source) {
+        return new Dijkstra()._distTree(graph, source);
+    }
+
+    protected <N extends Node2D<?,Integer>, G extends Graph<N>> Map<N, Double> _distTree (G graph, N source) {
+        Map<N, N> parent = new HashMap<>();
+        Map<N, Double> dist = new HashMap<>();
+        Queue<N> open = new PriorityQueue<>(Comparator.comparing(dist::get));
+        Set<N> closed = new HashSet<>();
+
+        parent.put(source, null);
+        open.add(source);
+        dist.put(source, 0.);
+
+        //  start an algorithm
+        N current;
+        while (!open.isEmpty()) {
+            current = open.poll();
+            process(current, graph, dist, parent, open, closed);
+        }
+        return dist;
+    }
+
+    protected  <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> _path (G graph, N source, N target) {
         Map<N, N> parent = new HashMap<>();
         Map<N, Double> dist = new HashMap<>();
         Queue<N> open = new PriorityQueue<>(Comparator.comparing(dist::get));
@@ -25,12 +50,12 @@ public class Dijkstra {
             current = open.poll();
             process(current, graph, dist, parent, open, closed);
             if (current == target)
-                return shortestPath(source, current, parent);
+                return pathTraceback(source, current, parent);
         }
         return null;
     }
 
-    private static <N extends Node2D<?,?>, G extends Graph<N>> void process
+    protected <N extends Node2D<?,Integer>, G extends Graph<N>> void process
             (N u, G graph, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
 
         for (var tr : graph.getAdjTable().get(u)) {
@@ -41,7 +66,7 @@ public class Dijkstra {
         closed.add(u);
     }
 
-    private static <N extends Node2D<?,?>> void relax
+    protected <N extends Node2D<?,Integer>> void relax
             (N u, N v, double weight, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
         if (!dist.containsKey(v) || dist.get(v) > dist.get(u) + weight) {
             dist.put(v, dist.get(u) + weight);
@@ -51,7 +76,7 @@ public class Dijkstra {
         }
     }
 
-    private static <N extends Node2D<?,?>, G extends Graph<N>> List<N> shortestPath
+    protected <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> pathTraceback
             (N source, N target, Map<N,N> parent) {
 
         List<N> path = new ArrayList<>();
@@ -65,5 +90,4 @@ public class Dijkstra {
 
         return path;
     }
-
 }

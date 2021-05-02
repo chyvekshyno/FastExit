@@ -9,7 +9,10 @@ import java.util.*;
 public class BiDirectionalDijkstra {
 
     public static <N extends Node2D<?,?>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+        return new BiDirectionalDijkstra()._path(graph, source, target);
+    }
 
+    protected <N extends Node2D<?,?>, G extends Graph<N>> List<N> _path (G graph, N source, N target) {
         //  init data structures
         Map<N, N> parentF = new HashMap<>();
         Map<N, N> parentB = new HashMap<>();
@@ -33,29 +36,22 @@ public class BiDirectionalDijkstra {
         distB.put(target, 0.);
 
         //  start an algorithm
-        N u = null;
-        N v = null;
+        N u, v;
         while (!openF.isEmpty() && !openB.isEmpty()) {
             u = openF.poll();
             process(u, graph, distF, parentF, openF, closedF);
             if (closedB.contains(u))
-                return shortestPath(source, parentF, distF, closedF,
-                                    target, parentB, distB, closedB);
+                return shortestPath(source, target, u, parentF, parentB);
 
             v = openB.poll();
             process(v, graph, distB, parentB, openB, closedB);
             if (closedF.contains(v))
-                return shortestPath(source, parentF, distF, closedF,
-                                    target, parentB, distB, closedB);
+                return shortestPath(source, target, v, parentF, parentB);
         }
         return null;
     }
 
-    private static <N extends Node2D<?,?>> N getMin (Map<N, Double> dist) {
-        return dist.keySet().stream().min(Comparator.comparing(dist::get)).orElse(null);
-    }
-
-    private static <N extends Node2D<?,?>, G extends Graph<N>> void process
+    protected <N extends Node2D<?,?>, G extends Graph<N>> void process
             (N u, G graph, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
 
         for (var tr : graph.getAdjTable().get(u)) {
@@ -67,7 +63,7 @@ public class BiDirectionalDijkstra {
         closed.add(u);
     }
 
-    private static <N extends Node2D<?,?>> void relax
+    protected <N extends Node2D<?,?>> void relax
             (N u, N v, double weight, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
         if (!dist.containsKey(v) || dist.get(v) > dist.get(u) + weight) {
             dist.put(v, dist.get(u) + weight);
@@ -77,7 +73,27 @@ public class BiDirectionalDijkstra {
         }
     }
 
-    private static <N extends Node2D<?,?>, G extends Graph<N>> List<N> shortestPath
+    protected <N extends Node2D<?,?>> List<N> shortestPath
+            (N source, N target, N touch, Map<N,N> parentF, Map<N,N> parentB) {
+
+        List<N> path = new ArrayList<>();
+        N last = touch;
+        while (last != source) {
+            path.add(last);
+            last = parentF.get(last);
+        } path.add(source);
+        Collections.reverse(path);
+
+        last = touch;
+        while (last != target) {
+            path.add(last);
+            last = parentB.get(last);
+        } path.add(target);
+
+        return path;
+    }
+
+    protected <N extends Node2D<?,?>> List<N> shortestPath
             (N source, Map<N,N> parentF, Map<N, Double> distF, Set<N> closedF,
              N target, Map<N,N> parentB, Map<N, Double> distB, Set<N> closedB) {
 
@@ -96,22 +112,7 @@ public class BiDirectionalDijkstra {
                 nodeBest = node;
             }
         }
-
-        List<N> path = new ArrayList<>();
-        N last = nodeBest;
-        while (last != source) {
-            path.add(last);
-            last = parentF.get(last);
-        } path.add(source);
-        Collections.reverse(path);
-
-        last = nodeBest;
-        while (last != target) {
-            path.add(last);
-            last = parentB.get(last);
-        } path.add(target);
-
-        return path;
+        return shortestPath(source, target, nodeBest, parentF, parentB);
     }
 
 }

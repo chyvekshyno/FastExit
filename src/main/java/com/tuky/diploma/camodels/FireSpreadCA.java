@@ -1,4 +1,4 @@
-package com.tuky.diploma.models;
+package com.tuky.diploma.camodels;
 
 import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
 import com.tuky.diploma.structures.cellular.CellularAutomata;
