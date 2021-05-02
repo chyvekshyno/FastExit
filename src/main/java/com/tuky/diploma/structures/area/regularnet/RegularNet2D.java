@@ -9,7 +9,6 @@ import com.tuky.diploma.structures.graph.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Create cell map from JSON file.
@@ -86,21 +85,35 @@ public abstract class RegularNet2D
     //region    METHODS
     @Override
     public void addNode(N node) {
-        if (node != null && !adjNodes.containsKey(node))
+        if (node != null && !adjTable.containsKey(node))
             initCellNodeEntry(node);
     }
 
     @Override
+    public void removeNode(N node) {
+        if (adjTable.containsKey(node)) {
+            removeRelationsOf(node);
+            adjTable.remove(node);
+        }
+    }
+
+    @Override
     protected void removeRelationsOf(N node) {
-        adjNodes.get(node).stream()
-                .filter(Objects::nonNull)
-                .map(Transition::getEnd)
-                .map(adjNodes::get)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
-                .filter(tr -> tr.getEnd() == node)
-                .forEach(tr -> tr = null);
+        N neighbour;
+        Transition<N> toRemove;
+        for (var tr : adjTable.get(node)) {
+            if (tr == null)
+                continue;
+
+            neighbour = tr.getEnd();
+            toRemove = adjTable.get(neighbour).stream()
+                        .filter(Objects::nonNull)
+                        .filter(t -> t.getEnd() == node)
+                        .findFirst().orElse(null);
+
+            adjTable.get(neighbour).remove(toRemove);
+            adjTable.get(node).remove(tr);
+        }
     }
 
     public void addTransition(N start, N end, int vec) throws Exception {
@@ -113,17 +126,16 @@ public abstract class RegularNet2D
 
     private void addTransition(N start, N end, int vec, boolean first, double weight) throws Exception {
         addNode(start);
-        if (adjNodes.get(start).get(vec) != null)
+        if (adjTable.get(start).get(vec) != null)
             throw new Exception("Cell already has neighbour on current vector");
-        adjNodes.get(start).set(vec, new Transition<>(start, end, weight));
+        adjTable.get(start).set(vec, new Transition<>(start, end, weight));
         if (first)
             addTransition(end, start, Moore2D.vecReverse(vec), false, weight);
     }
 
 
-    private void initCellNodeEntry(N node) {
-        this.adjNodes.put(node, new ArrayList<>(Collections
-                .nCopies(NodeMoore2D.NEIGHBOURS_COUNT, null)));
+    protected void initCellNodeEntry(N node) {
+        this.adjTable.put(node, new ArrayList<>());
     }
 
     public double getLen() {

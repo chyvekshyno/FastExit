@@ -32,8 +32,6 @@ public class AStar {
             if (current == end)
                 return reconstructPath(cameFrom, current);
 
-            if (graph.getAdjTable().get(current) == null)
-                continue;
             for (var tr : graph.getAdjTable().get(current)) {
                 if (tr == null)
                     continue;

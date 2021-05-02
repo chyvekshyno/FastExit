@@ -6,37 +6,37 @@ import java.util.List;
 import java.util.Map;
 
 public class Graph<N extends Node<? extends Comparable<?>>> {
-    protected final Map<N, List<Transition<N>>> adjNodes;
+    protected final Map<N, List<Transition<N>>> adjTable;
 
 
     public Graph() {
-        adjNodes = new HashMap<>();
+        adjTable = new HashMap<>();
     }
 
     public Graph(Map<N, List<Transition<N>>> adjNodes) {
-        this.adjNodes = adjNodes;
+        this.adjTable = adjNodes;
     }
 
     public Map<N, List<Transition<N>>> getAdjTable() {
-        return adjNodes;
+        return adjTable;
     }
 
     public void addNode(N node) {
-        adjNodes.putIfAbsent(node, new ArrayList<>());
+        adjTable.putIfAbsent(node, new ArrayList<>());
     }
 
     public void removeNode(N node) {
-        if (adjNodes.containsKey(node)) {
+        if (adjTable.containsKey(node)) {
             removeRelationsOf(node);
-            adjNodes.remove(node);
+            adjTable.remove(node);
         }
     }
 
     public void addTransition(N start, N end) {
-        if (adjNodes.containsKey(start)) {
-            adjNodes.get(start).add(new Transition<>(start, end));
+        if (adjTable.containsKey(start)) {
+            adjTable.get(start).add(new Transition<>(start, end));
         } else {
-            adjNodes.put(start, new ArrayList<>() {{
+            adjTable.put(start, new ArrayList<>() {{
                 add(new Transition<>(start, end));
             }});
         }
@@ -44,12 +44,12 @@ public class Graph<N extends Node<? extends Comparable<?>>> {
 
 
     public boolean removeTransition(N start, N end) {
-        return adjNodes.get(start)
+        return adjTable.get(start)
                 .removeIf(tr -> tr.equals(new Transition<>(start, end)));
     }
 
     protected void removeRelationsOf(N node) {
-        for (List<Transition<N>> list : adjNodes.values()) {
+        for (List<Transition<N>> list : adjTable.values()) {
             list.removeIf(tr -> tr.getEnd() == node);
         }
     }
