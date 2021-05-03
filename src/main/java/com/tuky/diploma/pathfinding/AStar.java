@@ -17,7 +17,7 @@ public class AStar extends Dijkstra{
         return new AStar(target)._path(graph, source, target);
     }
 
-    protected <N extends Node2D<?,Integer>, G extends Graph<N>> double potential
+    protected <N extends Node2D<?,Integer>> double potential
             (N node, N target) {
         double dx = node.getCoord().X() - target.getCoord().X();
         double dy = node.getCoord().Y() - target.getCoord().Y();

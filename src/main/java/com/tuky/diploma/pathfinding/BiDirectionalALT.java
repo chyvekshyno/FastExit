@@ -6,24 +6,23 @@ import com.tuky.diploma.structures.graph.Node2D;
 import java.util.List;
 import java.util.Map;
 
-public class ALT extends AStar {
+public class BiDirectionalALT extends BiDirectionalAStar{
 
     private final Map<Node2D<?,?>
-                    ,Map<? extends Node2D<?,?>, Double>> landmarks;
+            , Map<? extends Node2D<?,?>, Double>> landmarks;
 
-    protected <N extends Node2D<?, Integer>> ALT
-            (N target, Map<Node2D<?,?>, Map<? extends Node2D<?,?>, Double>> landmarks) {
-        super(target);
+    protected BiDirectionalALT(Map<Node2D<?, ?>, Map<? extends Node2D<?, ?>, Double>> landmarks) {
         this.landmarks = landmarks;
     }
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path(G graph, N source, N target) {
-        return new ALT(target, genLandmarks(graph))._path(graph, source, target);
+    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+        return new BiDirectionalALT(genLandmarks(graph))._path(graph, source, target);
     }
 
     public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path
             (G graph, Map<Node2D<?,?>, Map<? extends Node2D<?,?>, Double>> landmarks, N source, N target) {
-        return new ALT(target, landmarks)._path(graph, source, target);
+
+        return new BiDirectionalALT(landmarks)._path(graph, source, target);
     }
 
     @Override
@@ -35,6 +34,7 @@ public class ALT extends AStar {
 
     // FIXME: 03.05.2021
     private static  <G extends Graph<?>> Map<Node2D<?,?>, Map<? extends Node2D<?,?>, Double>> genLandmarks(G graph) {
+
         return null;
     }
 }

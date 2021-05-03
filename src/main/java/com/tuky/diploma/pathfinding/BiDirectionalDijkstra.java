@@ -6,14 +6,18 @@ import com.tuky.diploma.structures.graph.Node2D;
 
 import java.util.*;
 
-public class BiDirectionalDijkstra {
+public class BiDirectionalDijkstra extends Dijkstra {
 
-    public static <N extends Node2D<?,?>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+    protected BiDirectionalDijkstra() {
+        super();
+    }
+
+    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
         return new BiDirectionalDijkstra()._path(graph, source, target);
     }
 
-    protected <N extends Node2D<?,?>, G extends Graph<N>> List<N> _path (G graph, N source, N target) {
-        //  init data structures
+    @Override
+    protected <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> _path (G graph, N source, N target) {
         Map<N, N> parentF = new HashMap<>();
         Map<N, N> parentB = new HashMap<>();
 
@@ -41,39 +45,17 @@ public class BiDirectionalDijkstra {
             u = openF.poll();
             process(u, graph, distF, parentF, openF, closedF);
             if (closedB.contains(u))
-                return shortestPath(source, target, u, parentF, parentB);
+                return pathTraceback(source, target, u, parentF, parentB);
 
             v = openB.poll();
             process(v, graph, distB, parentB, openB, closedB);
             if (closedF.contains(v))
-                return shortestPath(source, target, v, parentF, parentB);
+                return pathTraceback(source, target, v, parentF, parentB);
         }
         return null;
     }
 
-    protected <N extends Node2D<?,?>, G extends Graph<N>> void process
-            (N u, G graph, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
-
-        for (var tr : graph.getAdjTable().get(u)) {
-            if (tr == null)
-                continue;
-
-            relax(u, tr.getEnd(), tr.getWeight(), dist, parent, open, closed);
-        }
-        closed.add(u);
-    }
-
-    protected <N extends Node2D<?,?>> void relax
-            (N u, N v, double weight, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
-        if (!dist.containsKey(v) || dist.get(v) > dist.get(u) + weight) {
-            dist.put(v, dist.get(u) + weight);
-            parent.put(v, u);
-            if (!open.contains(v) && !closed.contains(v))
-                open.add(v);
-        }
-    }
-
-    protected <N extends Node2D<?,?>> List<N> shortestPath
+    protected <N extends Node2D<?,Integer>> List<N> pathTraceback
             (N source, N target, N touch, Map<N,N> parentF, Map<N,N> parentB) {
 
         List<N> path = new ArrayList<>();
@@ -93,7 +75,7 @@ public class BiDirectionalDijkstra {
         return path;
     }
 
-    protected <N extends Node2D<?,?>> List<N> shortestPath
+    protected <N extends Node2D<?,Integer>> List<N> shortestPath
             (N source, Map<N,N> parentF, Map<N, Double> distF, Set<N> closedF,
              N target, Map<N,N> parentB, Map<N, Double> distB, Set<N> closedB) {
 
@@ -112,7 +94,7 @@ public class BiDirectionalDijkstra {
                 nodeBest = node;
             }
         }
-        return shortestPath(source, target, nodeBest, parentF, parentB);
+        return pathTraceback(source, target, nodeBest, parentF, parentB);
     }
 
 }
