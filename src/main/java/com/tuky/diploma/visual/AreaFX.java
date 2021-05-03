@@ -6,10 +6,7 @@ import com.tuky.diploma.structures.graph.Node2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +34,7 @@ public class AreaFX {
         return points;
     }
 
-    public static Circle toJavaFXUnitCircle(NodeMoore2D<Double, Integer> cell){
+    public static Circle toJavaFXUnitCircle(Node2D<Double, Integer> cell){
         return new Circle(cell.getCoord().X(), cell.getCoord().Y(), 0.05);
 
     }
@@ -63,8 +60,24 @@ public class AreaFX {
                 .collect(Collectors.toList());
     }
 
-    public static void paintLine(Line line) {
+    public static void paintFireCell(Rectangle cell) {
+
+    }
+
+    public static void paintGridCell(Shape cell) {
+        cell.setFill(Color.DARKGRAY);
+        cell.setStroke(Color.DARKGRAY);
+        cell.setStrokeWidth(0.1);
+    }
+
+    public static void paintBoundLine(Line line) {
         line.setStroke(Color.BLACK);
         line.setStrokeWidth(0.1);
+    }
+
+    public static void paintPath(Polyline path) {
+        path.setStroke(Color.GREEN);
+        path.setStrokeWidth(0.15);
+        path.setFill(Color.TRANSPARENT);
     }
 }
