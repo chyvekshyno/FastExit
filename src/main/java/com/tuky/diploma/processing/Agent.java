@@ -1,4 +1,4 @@
-package com.tuky.diploma;
+package com.tuky.diploma.processing;
 
 import com.tuky.diploma.pathfinding.Pathfinding;
 import com.tuky.diploma.structures.graph.Node;
