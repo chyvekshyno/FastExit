@@ -6,57 +6,63 @@ import com.tuky.diploma.structures.graph.Node2D;
 
 import java.util.*;
 
-public class BiDirectionalDijkstra extends Dijkstra {
+public class BiDirectionalDijkstra<N extends Node<?>, G extends Graph<N>>
+        extends Dijkstra<N, G> {
 
-    protected BiDirectionalDijkstra() {
-        super();
+    protected Map<N, N> parentB;
+    protected Map<N, Double> distB;
+    protected Queue<N> openB;
+    protected Set<N> closedB;
+
+    public BiDirectionalDijkstra(G graph) {
+        super(graph);
     }
 
     public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
-        return new BiDirectionalDijkstra()._path(graph, source, target);
+        return new BiDirectionalDijkstra<>(graph).path(source, target);
     }
 
     @Override
-    protected <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> _path (G graph, N source, N target) {
-        Map<N, N> parentF = new HashMap<>();
-        Map<N, N> parentB = new HashMap<>();
+    protected void initStructures() {
+        super.initStructures();
+        parentB = new HashMap<>();
+        distB   = new HashMap<>();
+        openB   = new PriorityQueue<>(Comparator.comparing(distB::get));
+        closedB = new HashSet<>();
+    }
 
-        Map<N, Double> distF = new HashMap<>();
-        Map<N, Double> distB = new HashMap<>();
-
-        Queue<N> openF = new PriorityQueue<>(Comparator.comparing(distF::get));
-        Queue<N> openB = new PriorityQueue<>(Comparator.comparing(distB::get));
-
-        Set<N> closedF = new HashSet<>();
-        Set<N> closedB = new HashSet<>();
-
-        parentF.put(source, null);
+    @Override
+    protected void initData(N source, N target) {
+        parent .put(source, null);
         parentB.put(target, null);
 
-        openF.add(source);
+        open .add(source);
         openB.add(target);
 
-        distF.put(source, 0.);
+        dist .put(source, 0.);
         distB.put(target, 0.);
+    }
 
-        //  start an algorithm
+    @Override
+    protected List<N> algorithm(N source, N target) {
         N u, v;
-        while (!openF.isEmpty() && !openB.isEmpty()) {
-            u = openF.poll();
-            process(u, graph, distF, parentF, openF, closedF);
+        while (!open.isEmpty() && !openB.isEmpty()) {
+            u = open.poll();
+            process(u, dist, parent, open, closed);
             if (closedB.contains(u))
-                return pathTraceback(source, target, u, parentF, parentB);
+                return pathTraceback(source, target, u, parent, parentB);
 
             v = openB.poll();
-            process(v, graph, distB, parentB, openB, closedB);
-            if (closedF.contains(v))
-                return pathTraceback(source, target, v, parentF, parentB);
+            process(v, distB, parentB, openB, closedB);
+            if (closed.contains(v))
+                return pathTraceback(source, target, v, parent, parentB);
         }
         return null;
     }
 
-    protected <N extends Node2D<?,Integer>> List<N> pathTraceback
-            (N source, N target, N touch, Map<N,N> parentF, Map<N,N> parentB) {
+    protected List<N> pathTraceback(N source, N target, N touch,
+                                    Map<N,N> parentF,
+                                    Map<N,N> parentB) {
 
         List<N> path = new ArrayList<>();
         N last = touch;
@@ -75,7 +81,7 @@ public class BiDirectionalDijkstra extends Dijkstra {
         return path;
     }
 
-    protected <N extends Node2D<?,Integer>> List<N> shortestPath
+    protected List<N> shortestPath
             (N source, Map<N,N> parentF, Map<N, Double> distF, Set<N> closedF,
              N target, Map<N,N> parentB, Map<N, Double> distB, Set<N> closedB) {
 

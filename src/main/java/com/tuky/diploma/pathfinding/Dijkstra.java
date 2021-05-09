@@ -1,84 +1,101 @@
 package com.tuky.diploma.pathfinding;
 
 import com.tuky.diploma.structures.graph.Graph;
-import com.tuky.diploma.structures.graph.Node2D;
+import com.tuky.diploma.structures.graph.Node;
 
 import java.util.*;
 
-public class Dijkstra {
+public class Dijkstra <N extends Node<?>, G extends Graph<N>>
+        implements Pathfinding<N> {
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
-        return new Dijkstra()._path(graph, source, target);
+    protected final G graph;
+    protected Map<N, N> parent;
+    protected Map<N, Double> dist;
+    protected Queue<N> open;
+    protected Set<N> closed;
+
+    public Dijkstra(G graph) {
+        this.graph = graph;
     }
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> Map<N, Double> distTree (G graph, N source) {
-        return new Dijkstra()._distTree(graph, source);
+    public static <N extends Node<?>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+        return new Dijkstra<N, G>(graph).path(source, target);
     }
 
-    protected <N extends Node2D<?,Integer>, G extends Graph<N>> Map<N, Double> _distTree (G graph, N source) {
-        Map<N, N> parent = new HashMap<>();
-        Map<N, Double> dist = new HashMap<>();
-        Queue<N> open = new PriorityQueue<>(Comparator.comparing(dist::get));
-        Set<N> closed = new HashSet<>();
+    public static <N extends Node<?>, G extends Graph<N>> Map<N, Double> distTree (G graph, N source) {
+        return new Dijkstra<N, G>(graph)._distTree(source);
+    }
 
-        parent.put(source, null);
-        open.add(source);
-        dist.put(source, 0.);
+    public List<N> path(N source, N target) {
+        initStructures();
+        initData(source, target);
+        return algorithm(source, target);
+    }
+
+    protected Map<N, Double> _distTree (N source) {
+        initStructures();
+        initData(source, null);
 
         //  start an algorithm
         N current;
         while (!open.isEmpty()) {
             current = open.poll();
-            process(current, graph, dist, parent, open, closed);
+            process(current, dist, parent, open, closed);
         }
         return dist;
     }
 
-    protected  <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> _path (G graph, N source, N target) {
-        Map<N, N> parent = new HashMap<>();
-        Map<N, Double> dist = new HashMap<>();
-        Queue<N> open = new PriorityQueue<>(Comparator.comparing(dist::get));
-        Set<N> closed = new HashSet<>();
+    protected void initStructures() {
+        parent  = new HashMap<>();
+        dist    = new HashMap<>();
+        open    = new PriorityQueue<>(Comparator.comparing(dist::get));
+        closed  = new HashSet<>();
+    }
 
+    protected void initData(N source, N target) {
         parent.put(source, null);
         open.add(source);
         dist.put(source, 0.);
+    }
 
-        //  start an algorithm
+    protected List<N> algorithm(N source, N target) {
         N current;
         while (!open.isEmpty()) {
             current = open.poll();
-            process(current, graph, dist, parent, open, closed);
+            process(current, dist, parent, open, closed);
             if (current == target)
                 return pathTraceback(source, current, parent);
         }
         return null;
     }
 
-    protected <N extends Node2D<?,Integer>, G extends Graph<N>> void process
-            (N u, G graph, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
-
-        for (var tr : graph.getAdjTable().get(u)) {
+    protected void process(N current,
+                           Map<N, Double> dist,
+                           Map<N, N> parent,
+                           Queue<N> open,
+                           Set<N> closed) {
+        for (var tr : graph.getAdjTable().get(current)) {
             if (tr == null)
                 continue;
-            relax(u, tr.getEnd(), tr.getWeight(), dist, parent, open, closed);
+            relax(current, tr.getEnd(), tr.getWeight(), dist, parent, open, closed);
         }
-        closed.add(u);
+        closed.add(current);
     }
 
-    protected <N extends Node2D<?,Integer>> void relax
-            (N u, N v, double weight, Map<N, Double> dist, Map<N, N> parent, Queue<N> open, Set<N> closed) {
-        if (!dist.containsKey(v) || dist.get(v) > dist.get(u) + weight) {
-            dist.put(v, dist.get(u) + weight);
-            parent.put(v, u);
-            if (!open.contains(v) && !closed.contains(v))
-                open.add(v);
+    protected void relax(N curr, N neighbour, double weight,
+                         Map<N, Double> dist,
+                         Map<N, N> parent,
+                         Queue<N> open,
+                         Set<N> closed) {
+        if (!dist.containsKey(neighbour) || dist.get(neighbour) > dist.get(curr) + weight) {
+            dist.put(neighbour, dist.get(curr) + weight);
+            parent.put(neighbour, curr);
+            if (!open.contains(neighbour) && !closed.contains(neighbour))
+                open.add(neighbour);
         }
     }
 
-    protected <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> pathTraceback
-            (N source, N target, Map<N,N> parent) {
-
+    protected List<N> pathTraceback(N source, N target, Map<N,N> parent) {
         List<N> path = new ArrayList<>();
         N last = target;
         while (last != source) {

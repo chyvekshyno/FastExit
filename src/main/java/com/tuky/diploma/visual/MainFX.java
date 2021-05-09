@@ -2,6 +2,9 @@ package com.tuky.diploma.visual;
 
 import com.tuky.diploma.camodels.FireCellMoore2D;
 import com.tuky.diploma.camodels.FireSpreadCA;
+import com.tuky.diploma.pathfinding.ALT;
+import com.tuky.diploma.pathfinding.BiDirectionalAStar;
+import com.tuky.diploma.pathfinding.BiDirectionalDijkstra;
 import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.AreaJSONParser;
 import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
@@ -111,6 +114,7 @@ public class MainFX extends Application {
 
         drawBounds(area, group);
         drawGridInit(grid, group);
+        drawPath(BiDirectionalDijkstra.path(grid, grid.get(13,13), grid.get(45, 35)), group);
         scale(group, new Scale(20,20));
 
         primaryStage.setScene(scene);
