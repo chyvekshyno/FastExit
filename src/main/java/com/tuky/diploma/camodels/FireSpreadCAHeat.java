@@ -7,8 +7,8 @@ import com.tuky.diploma.structures.graph.Transition;
 
 import java.util.*;
 
-public class FireSpreadCA
-        extends CellularAutomata<FireCellMoore2D> {
+public class FireSpreadCAHeat
+        extends CellularAutomata<FireCellMoore2DHeat> {
 
     private final double unitTime;
 
@@ -16,7 +16,7 @@ public class FireSpreadCA
         return unitTime;
     }
 
-    public FireSpreadCA(RegularNet2D<FireCellMoore2D> grid, double unitTime) {
+    public FireSpreadCAHeat(RegularNet2D<FireCellMoore2DHeat> grid, double unitTime) {
         super(grid);
         this.unitTime = unitTime;
     }
@@ -27,13 +27,13 @@ public class FireSpreadCA
     }
 
     @Override
-    protected final double nextCellState(FireCellMoore2D cell) {
+    protected final double nextCellState(FireCellMoore2DHeat cell) {
 
         switch (cell.getState()) {
             case FUEL -> {
                 List<Double> heat = new ArrayList<>();
 
-                Transition<FireCellMoore2D> tr;
+                Transition<FireCellMoore2DHeat> tr;
                 double value;
                 for (int vec = 0; vec < Moore2D.NEIGHBOURS_COUNT; vec++) {
                     tr = getGrid().getAdjTable().get(cell).get(vec);
@@ -57,7 +57,7 @@ public class FireSpreadCA
         return 0.;
     }
 
-    private double heat(FireCellMoore2D cell, FireCellMoore2D cellFire) {
+    private double heat(FireCellMoore2DHeat cell, FireCellMoore2DHeat cellFire) {
         return  cell.getValue()
                 + (getUnitTime() * cell.getKOEF_HEAT() * ((cellFire.out() - cell.getValue())
                 / (getGrid().getLen() * getGrid().getLen())) ) ;

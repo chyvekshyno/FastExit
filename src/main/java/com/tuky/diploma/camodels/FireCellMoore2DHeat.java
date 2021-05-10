@@ -4,7 +4,7 @@ import com.tuky.diploma.structures.area.Coord;
 import com.tuky.diploma.structures.cellular.CellularAutomaton;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 
-public class FireCellMoore2D
+public class FireCellMoore2DHeat
         extends NodeMoore2D<Double, Integer>
         implements CellularAutomaton {
 
@@ -25,11 +25,11 @@ public class FireCellMoore2D
         return state;
     }
 
-    public FireCellMoore2D(Coord<Integer> coord) {
+    public FireCellMoore2DHeat(Coord<Integer> coord) {
         this(coord, 250, 20, 0.42, FireCellState.FUEL);
     }
 
-    public FireCellMoore2D(Coord<Integer> coord, double igniteKoef, double burnTime, double koef_heat, FireCellState state) {
+    public FireCellMoore2DHeat(Coord<Integer> coord, double igniteKoef, double burnTime, double koef_heat, FireCellState state) {
         super(coord);
         this.TEMP_IGNITE = igniteKoef;
         this.state = state;
@@ -83,13 +83,13 @@ public class FireCellMoore2D
     }
 
 
-    public static FireCellMoore2D at
+    public static FireCellMoore2DHeat at
             (Coord<Integer> coord, double ignTemp, double burnTime, double heatKoef, FireCellState state) {
-        return new FireCellMoore2D(coord, ignTemp, burnTime, heatKoef, state);
+        return new FireCellMoore2DHeat(coord, ignTemp, burnTime, heatKoef, state);
     }
 
-    public static FireCellMoore2D at (int x, int y) {
-        return FireCellMoore2D.at(Coord.at(x, y), 250, 3, 0.12, FireCellState.FUEL);
+    public static FireCellMoore2DHeat at (int x, int y) {
+        return FireCellMoore2DHeat.at(Coord.at(x, y), 250, 3, 0.12, FireCellState.FUEL);
     }
 
     public void setFire() {

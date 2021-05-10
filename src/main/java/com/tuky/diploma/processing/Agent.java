@@ -13,6 +13,14 @@ public class Agent<N extends Node<?>> {
         this.position = position;
     }
 
+    public N getPosition() {
+        return position;
+    }
+
+    public List<N> getPath() {
+        return path;
+    }
+
     public void move() throws Exception {
         if (position != path.get(0))
             throw new Exception("agents position and path are not synchronised ");
