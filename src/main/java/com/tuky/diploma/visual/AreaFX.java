@@ -83,6 +83,27 @@ public class AreaFX {
         return polyline;
     }
 
+    public static <N extends Node2D<?, Integer>> List<Double> toJavaFXPathPoints
+            (Map<N,N> next, N start) {
+        List<Double> points = new ArrayList<>() {{  add((double) start.getCoord().X());
+                                                    add((double) start.getCoord().Y());  }};
+
+        N curr = next.get(start);
+        while (curr != null) {
+            points.add((double) curr.getCoord().X());
+            points.add((double) curr.getCoord().Y());
+            curr = next.get(curr);
+        }
+        return points;
+    }
+
+    public static <N extends Node2D<?, Integer>> Polyline getPolylinePath (Map<N,N> path, N start) {
+        Polyline polyline = new Polyline();
+        polyline.getPoints().addAll(AreaFX.toJavaFXPathPoints(path, start));
+        AreaFX.paintPath(polyline);
+        return polyline;
+    }
+
     public static void updateGrid (Map<FireCellMoore2DStochastic, Shape> gridMap,
                                    List<FireCellMoore2DStochastic> agents,
                                    List<FireCellMoore2DStochastic> exits) {

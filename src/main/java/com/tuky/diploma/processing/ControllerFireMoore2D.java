@@ -3,8 +3,7 @@ package com.tuky.diploma.processing;
 import com.tuky.diploma.camodels.FireCellMoore2DHeat;
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
-import com.tuky.diploma.pathfinding.Dijkstra;
-import com.tuky.diploma.pathfinding.Pathfinding;
+import com.tuky.diploma.pathfinding.*;
 import com.tuky.diploma.structures.area.regularnet.RegularNetMoore2D;
 import com.tuky.diploma.structures.cellular.CellularAutomata;
 import com.tuky.diploma.visual.AreaFX;
@@ -124,14 +123,14 @@ public class ControllerFireMoore2D {
         agents.forEach((key, value) -> {
             value.getPoints().clear();
             value.getPoints().addAll(
-                    AreaFX.toJavaFXPathPoints(key.getPath())
+                    AreaFX.toJavaFXPathPoints(key.getPath(), key.getPosition())
             );
         });
 
     }
 
     private Runnable updatePathRunnable(Agent<FireCellMoore2DStochastic> agent) {
-        return () -> agent.updatePath(new Dijkstra<>(graph), exits.get(0));
+        return () -> agent.updatePath(new TreeAAStar<>(graph), exits.get(0));
     }
 
     private boolean isSafe(Agent<FireCellMoore2DStochastic> agent) {

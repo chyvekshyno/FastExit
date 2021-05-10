@@ -6,19 +6,19 @@ import com.tuky.diploma.structures.graph.Node2D;
 
 import java.util.*;
 
-public class BiDirectionalDijkstra<N extends Node<?>, G extends Graph<N>>
-        extends Dijkstra<N, G> {
+public class BiDirectionalDijkstra<N extends Node<?>>
+        extends Dijkstra<N> {
 
     protected Map<N, N> parentB;
     protected Map<N, Double> distB;
     protected Queue<N> openB;
     protected Set<N> closedB;
 
-    public BiDirectionalDijkstra(G graph) {
+    public BiDirectionalDijkstra(Graph<N> graph) {
         super(graph);
     }
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+    public static <N extends Node2D<?,Integer>> Map<N, N> path (Graph<N> graph, N source, N target) {
         return new BiDirectionalDijkstra<>(graph).path(source, target);
     }
 
@@ -44,7 +44,7 @@ public class BiDirectionalDijkstra<N extends Node<?>, G extends Graph<N>>
     }
 
     @Override
-    protected List<N> algorithm(N source, N target) {
+    protected Map<N, N> algorithm(N source, N target) {
         N u, v;
         while (!open.isEmpty() && !openB.isEmpty()) {
             u = open.poll();
@@ -60,47 +60,19 @@ public class BiDirectionalDijkstra<N extends Node<?>, G extends Graph<N>>
         return null;
     }
 
-    protected List<N> pathTraceback(N source, N target, N touch,
+    protected Map<N, N> pathTraceback(N source, N target, N touch,
                                     Map<N,N> parentF,
                                     Map<N,N> parentB) {
 
-        List<N> path = new ArrayList<>();
-        N last = touch;
-        while (last != source) {
-            path.add(last);
-            last = parentF.get(last);
-        } path.add(source);
-        Collections.reverse(path);
-
-        last = touch;
-        while (last != target) {
-            path.add(last);
-            last = parentB.get(last);
-        } path.add(target);
-
+        Map<N, N> path = new HashMap<>();
+        N curr = touch;
+        N prev = parentF.get(curr);
+        while (curr != source) {
+            path.put(prev, curr);
+            curr = prev;
+            prev = parentF.get(prev);
+        } path.put(prev, curr);
+        path.putAll(parentB);
         return path;
     }
-
-    protected List<N> shortestPath
-            (N source, Map<N,N> parentF, Map<N, Double> distF, Set<N> closedF,
-             N target, Map<N,N> parentB, Map<N, Double> distB, Set<N> closedB) {
-
-        double distBest = Double.POSITIVE_INFINITY;
-        N nodeBest = null;
-
-        Set<N> closedCommon = new HashSet<>(closedF);
-        closedCommon.addAll(closedB);
-
-        for (var node : closedCommon) {
-            if (!distF.containsKey(node) || !distB.containsKey(node))
-                continue;
-
-            if (distF.get(node) + distB.get(node) < distBest) {
-                distBest = distF.get(node) + distB.get(node);
-                nodeBest = node;
-            }
-        }
-        return pathTraceback(source, target, nodeBest, parentF, parentB);
-    }
-
 }

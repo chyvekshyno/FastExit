@@ -3,11 +3,11 @@ package com.tuky.diploma.processing;
 import com.tuky.diploma.pathfinding.Pathfinding;
 import com.tuky.diploma.structures.graph.Node;
 
-import java.util.List;
+import java.util.Map;
 
 public class Agent<N extends Node<?>> {
     private N position;
-    private List<N> path;
+    private Map<N, N> path;
 
     public Agent(N position) {
         this.position = position;
@@ -17,15 +17,14 @@ public class Agent<N extends Node<?>> {
         return position;
     }
 
-    public List<N> getPath() {
+    public Map<N,N> getPath() {
         return path;
     }
 
-    public void move() throws Exception {
-        if (position != path.get(0))
-            throw new Exception("agents position and path are not synchronised ");
-        path.remove(0);
-        position = path.get(0);
+    public void move(){
+        N temp = position;
+        position = path.get(position);
+        path.remove(temp);
     }
 
     public void updatePath(Pathfinding<N> pathfinding, N target) {

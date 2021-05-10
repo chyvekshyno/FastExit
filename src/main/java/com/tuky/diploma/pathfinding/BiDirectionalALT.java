@@ -6,28 +6,28 @@ import com.tuky.diploma.structures.graph.Node2D;
 import java.util.List;
 import java.util.Map;
 
-public class BiDirectionalALT <N extends Node2D<?, Integer>, G extends Graph<N>>
-        extends BiDirectionalAStar<N, G>{
+public class BiDirectionalALT <N extends Node2D<?, Integer>>
+        extends BiDirectionalAStar<N>{
 
     private final Map<N, Map<N, Double>> landmarks;
 
-    public BiDirectionalALT(G graph) {
+    public BiDirectionalALT(Graph<N> graph) {
         super(graph);
         landmarks = genLandmarks(graph);
     }
 
-    protected BiDirectionalALT(G graph, Map<N, Map<N, Double>> landmarks) {
+    protected BiDirectionalALT(Graph<N> graph, Map<N, Map<N, Double>> landmarks) {
         super(graph);
         this.landmarks = landmarks;
     }
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+    public static <N extends Node2D<?,Integer>> Map<N, N> path (Graph<N> graph, N source, N target) {
         return new BiDirectionalALT<>(graph).path(source, target);
     }
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path(G graph,
-                                                                                 Map<N, Map<N, Double>> landmarks,
-                                                                                 N source, N target) {
+    public static <N extends Node2D<?,Integer>> Map<N, N> path(Graph<N> graph,
+                                                             Map<N, Map<N, Double>> landmarks,
+                                                             N source, N target) {
         return new BiDirectionalALT<>(graph, landmarks).path(source, target);
     }
 
@@ -39,7 +39,7 @@ public class BiDirectionalALT <N extends Node2D<?, Integer>, G extends Graph<N>>
     }
 
     // FIXME: 03.05.2021
-    private static <N extends Node2D<?, Integer>, G extends Graph<N>>  Map<N, Map<N, Double>> genLandmarks(G graph) {
+    private static <N extends Node2D<?, Integer>>  Map<N, Map<N, Double>> genLandmarks(Graph<N> graph) {
         return null;
     }
 }

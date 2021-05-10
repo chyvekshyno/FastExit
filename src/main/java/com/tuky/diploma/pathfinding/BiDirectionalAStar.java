@@ -5,19 +5,19 @@ import com.tuky.diploma.structures.graph.Node2D;
 
 import java.util.*;
 
-public class BiDirectionalAStar<N extends Node2D<?, Integer>, G extends Graph<N>>
-        extends BiDirectionalDijkstra<N, G>{
+public class BiDirectionalAStar<N extends Node2D<?, Integer>>
+        extends BiDirectionalDijkstra<N>{
 
-    public BiDirectionalAStar(G graph) {
+    public BiDirectionalAStar(Graph<N> graph) {
         super(graph);
     }
 
-    public static <N extends Node2D<?,Integer>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
+    public static <N extends Node2D<?,Integer>> Map<N, N> path (Graph<N> graph, N source, N target) {
         return new BiDirectionalAStar<>(graph).path(source, target);
     }
 
     @Override
-    protected List<N> algorithm(N source, N target) {
+    protected Map<N, N> algorithm(N source, N target) {
         N u, v;
         while (!open.isEmpty() && !openB.isEmpty()) {
             u = open.poll();

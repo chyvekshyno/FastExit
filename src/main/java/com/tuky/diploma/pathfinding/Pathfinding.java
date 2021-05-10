@@ -2,8 +2,8 @@ package com.tuky.diploma.pathfinding;
 
 import com.tuky.diploma.structures.graph.Node;
 
-import java.util.List;
+import java.util.Map;
 
 public interface Pathfinding<N extends Node<?>> {
-    List<N> path(N source, N goal);
+    Map<N, N> path(N source, N goal);
 }

@@ -5,35 +5,36 @@ import com.tuky.diploma.structures.graph.Node;
 
 import java.util.*;
 
-public class Dijkstra <N extends Node<?>, G extends Graph<N>>
+public class Dijkstra <N extends Node<?>>
         implements Pathfinding<N> {
 
-    protected final G graph;
+    protected final Graph<N> graph;
     protected Map<N, N> parent;
     protected Map<N, Double> dist;
     protected Queue<N> open;
     protected Set<N> closed;
 
-    public Dijkstra(G graph) {
+    public Dijkstra(Graph<N> graph) {
         this.graph = graph;
-    }
-
-    public static <N extends Node<?>, G extends Graph<N>> List<N> path (G graph, N source, N target) {
-        return new Dijkstra<N, G>(graph).path(source, target);
-    }
-
-    public static <N extends Node<?>, G extends Graph<N>> Map<N, Double> distTree (G graph, N source) {
-        return new Dijkstra<N, G>(graph)._distTree(source);
-    }
-
-    public List<N> path(N source, N target) {
         initStructures();
+    }
+
+    public static <N extends Node<?>> Map<N, N> path (Graph<N> graph, N source, N target) {
+        return new Dijkstra<N>(graph).path(source, target);
+    }
+
+    public static <N extends Node<?>> Map<N, Double> distTree (Graph<N> graph, N source) {
+        return new Dijkstra<N>(graph)._distTree(source);
+    }
+
+    public Map<N, N> path(N source, N target) {
         initData(source, target);
-        return algorithm(source, target);
+        var path = algorithm(source, target);
+        clearData();
+        return path;
     }
 
     protected Map<N, Double> _distTree (N source) {
-        initStructures();
         initData(source, null);
 
         //  start an algorithm
@@ -58,13 +59,21 @@ public class Dijkstra <N extends Node<?>, G extends Graph<N>>
         dist.put(source, 0.);
     }
 
-    protected List<N> algorithm(N source, N target) {
+    protected void clearData(){
+        parent.clear();
+        dist  .clear();
+        open  .clear();
+        closed.clear();
+    }
+
+    protected Map<N, N> algorithm(N source, N target) {
         N current;
         while (!open.isEmpty()) {
             current = open.poll();
-            process(current, dist, parent, open, closed);
             if (current == target)
                 return pathTraceback(source, current, parent);
+
+            process(current, dist, parent, open, closed);
         }
         return null;
     }
@@ -87,7 +96,7 @@ public class Dijkstra <N extends Node<?>, G extends Graph<N>>
                          Map<N, N> parent,
                          Queue<N> open,
                          Set<N> closed) {
-        if (!dist.containsKey(neighbour) || dist.get(neighbour) > dist.get(curr) + weight) {
+        if (relaxCondition(curr, neighbour, weight)) {
             dist.put(neighbour, dist.get(curr) + weight);
             parent.put(neighbour, curr);
             if (!open.contains(neighbour) && !closed.contains(neighbour))
@@ -95,16 +104,19 @@ public class Dijkstra <N extends Node<?>, G extends Graph<N>>
         }
     }
 
-    protected List<N> pathTraceback(N source, N target, Map<N,N> parent) {
-        List<N> path = new ArrayList<>();
-        N last = target;
+    protected Map<N, N> pathTraceback(N source, N target, Map<N,N> parent) {
+        Map<N, N> path = new HashMap<>();
+        N last = parent.get(target);
         while (last != source) {
-            path.add(last);
+            path.put(last, target);
+            target = last;
             last = parent.get(last);
         }
-        path.add(source);
-        Collections.reverse(path);
-
+        path.put(source, target);
         return path;
+    }
+
+    protected boolean relaxCondition(N curr, N next, double weight) {
+        return  !dist.containsKey(next) || dist.get(next) > dist.get(curr) + weight;
     }
 }

@@ -4,6 +4,8 @@ import com.tuky.diploma.camodels.FireCellMoore2DHeat;
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.camodels.FireSpreadCAHeat;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
+import com.tuky.diploma.pathfinding.AStar;
+import com.tuky.diploma.pathfinding.AdaptiveAStar;
 import com.tuky.diploma.pathfinding.Dijkstra;
 import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.processing.ControllerFireMoore2D;
@@ -124,7 +126,7 @@ public class MainFX extends Application {
 
         ControllerFireMoore2D controller = new ControllerFireMoore2D(grid,
                 gridMap,
-                new Dijkstra<>(grid),
+                new AdaptiveAStar<>(grid),
                 new ArrayList<>() {{  add(new Agent<>(grid.get(13, 13)));
                                       add(new Agent<>(grid.get(30, 25)));  }},
                 new ArrayList<>() {{  add(grid.get(45, 35));  }},
