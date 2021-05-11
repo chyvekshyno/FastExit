@@ -20,18 +20,17 @@ import java.util.stream.Collectors;
 public class ControllerFireMoore2D {
 
     //  region  Fields
-    private RegularNetMoore2D<FireCellMoore2DStochastic> graph;
-    private Map<Agent<FireCellMoore2DStochastic>, Polyline> agents;
-    private List<FireCellMoore2DStochastic> exits;
-    private FireSpreadCAStochastic CA;
+    private final RegularNetMoore2D<FireCellMoore2DStochastic> graph;
+    private final Map<Agent<FireCellMoore2DStochastic>, Polyline> agents;
+    private final List<FireCellMoore2DStochastic> exits;
+    private final FireSpreadCAStochastic CA;
 
     private Pathfinding<FireCellMoore2DStochastic> pathfinding;
 
-    private Map<FireCellMoore2DStochastic, Shape> gridFX;
-    private Group group;
+    private final Map<FireCellMoore2DStochastic, Shape> gridFX;
 
     private int ts;
-    private AtomicBoolean processing;
+    private final AtomicBoolean processing;
     //endregion
 
     public ControllerFireMoore2D(RegularNetMoore2D<FireCellMoore2DStochastic> graph,
@@ -77,8 +76,12 @@ public class ControllerFireMoore2D {
         }
     }
 
-    // FIXME: 09.05.2021    NEED TO BE DESCRIBED
-    public void abort() {}
+    public void abort() {
+        processing.set(false);
+        gridFX.clear();
+        agents.clear();
+        exits.clear();
+    }
 
     private void step() {
         stepAgents();

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox fx:id="hbox_main"
+      maxHeight="-Infinity"
+      maxWidth="-Infinity"
+      minHeight="-Infinity"
+      minWidth="-Infinity"
+      prefHeight="800.0"
+      prefWidth="1200.0"
+      style="-fx-background-color: silver;"
+      xmlns="http://javafx.com/javafx/11.0.2"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.tuky.diploma.visual.ControllerFX">
+   <children>
+      <VBox fx:id="vbox_controller"
+            alignment="TOP_CENTER"
+            maxHeight="1.7976931348623157E308"
+            prefWidth="100.0"
+            style="-fx-background-color: silver;"
+            HBox.hgrow="NEVER">
+         <children>
+            <Button fx:id="btn_start"
+                    maxWidth="1.7976931348623157E308"
+                    mnemonicParsing="false"
+                    style="-fx-background-color: SILVER;"
+                    text="S T A R T"
+                    textAlignment="CENTER"
+                    onMouseClicked="#clickedStart">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding></Button>
+            <Button fx:id="btn_resume"
+                    layoutX="10.0"
+                    layoutY="26.0"
+                    maxWidth="1.7976931348623157E308"
+                    mnemonicParsing="false"
+                    style="-fx-background-color: SILVER;"
+                    text="R E S U M E"
+                    textAlignment="CENTER"
+                    onMouseClicked="#clickedResume">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding>
+            </Button>
+            <Button fx:id="btn_stop"
+                    layoutX="10.0"
+                    layoutY="62.0"
+                    maxWidth="1.7976931348623157E308"
+                    mnemonicParsing="false"
+                    style="-fx-background-color: SILVER;"
+                    text="S T O P "
+                    textAlignment="CENTER"
+                    onMouseClicked="#clickedStop">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding>
+            </Button>
+            <Button fx:id="btn_abort"
+                    layoutX="10.0"
+                    layoutY="98.0"
+                    maxWidth="1.7976931348623157E308"
+                    mnemonicParsing="false"
+                    style="-fx-background-color: SILVER;"
+                    text="A B O R T"
+                    textAlignment="CENTER"
+                    onMouseClicked="#clickedAbort">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding>
+            </Button>
+         </children>
+         <padding>
+            <Insets bottom="16.0" top="16.0" />
+         </padding>
+      </VBox>
+      <Pane fx:id="pane_draw"
+            maxHeight="1.7976931348623157E308"
+            maxWidth="1.7976931348623157E308"
+            prefHeight="200.0"
+            prefWidth="200.0"
+            style="-fx-background-color: whitesmoke; -fx-background-radius: 0;" HBox.hgrow="ALWAYS">
+         <HBox.margin>
+            <Insets />
+         </HBox.margin></Pane>
+   </children>
+</HBox>
