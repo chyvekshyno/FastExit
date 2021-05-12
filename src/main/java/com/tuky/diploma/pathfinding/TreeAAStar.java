@@ -86,9 +86,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     protected void clearData() {
         dist = new HashMap<>();
         closed = new HashSet<>();
-        open = new PriorityQueue<>(
-                Comparator.comparing(
-                    node -> dist.get(node) + H.get(node)));
+        open = new PriorityQueue<>(openComparator());
     }
 
     @Override

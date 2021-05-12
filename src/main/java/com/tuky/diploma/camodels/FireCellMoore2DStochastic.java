@@ -1,25 +1,44 @@
 package com.tuky.diploma.camodels;
 
+import com.tuky.diploma.structures.addition.Risk;
 import com.tuky.diploma.structures.area.Coord;
 import com.tuky.diploma.structures.cellular.CellularAutomaton;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 
 public class FireCellMoore2DStochastic
         extends NodeMoore2D<Double, Integer>
-        implements CellularAutomaton {
+        implements CellularAutomaton, Risk {
 
     private FireCellState state;
 
     private final double KOEF_IGNITE;
     private final double TIME_BURN;
 
-    private boolean ignite;
+
+    @Override
+    public double getMaxDamage() {
+        return getState().damage();
+    }
 
     public enum FireCellState{
-        FUEL    ,
-        NonFUEL ,
-        BURNED  ,
-        FIRE;
+        FUEL    {
+            @Override
+            public double damage() {  return 1;  }
+        },
+        NonFUEL {
+            @Override
+            public double damage() {  return 0;  }
+        },
+        BURNED {
+            @Override
+            public double damage() {  return 5;  }
+        },
+        FIRE {
+            @Override
+            public double damage() {  return 10;  }
+        };
+
+        abstract public double damage();
 
     }
     public FireCellState getState() {
@@ -35,7 +54,6 @@ public class FireCellMoore2DStochastic
         this.KOEF_IGNITE = koef_ignite;
         this.TIME_BURN = burnTime;
         setValue(0.);
-        ignite = false;
     }
 
     public double KOEF_IGNITE() {
@@ -61,10 +79,6 @@ public class FireCellMoore2DStochastic
         state = FireCellState.FIRE;
         setValue(1.);
         return true;
-    }
-
-    public boolean isIgnite() {
-        return ignite;
     }
 
     private void fire_burn(double time) {

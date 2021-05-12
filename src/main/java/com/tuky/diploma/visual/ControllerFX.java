@@ -2,9 +2,9 @@ package com.tuky.diploma.visual;
 
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
-import com.tuky.diploma.pathfinding.AdaptiveAStar;
 import com.tuky.diploma.processing.Agent;
-import com.tuky.diploma.processing.ControllerFireMoore2D;
+import com.tuky.diploma.processing.ControllerFire;
+import com.tuky.diploma.processing.ControllerTAAFire;
 import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.AreaJSONParser;
 import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
@@ -49,7 +49,7 @@ public class ControllerFX {
     private Map<Agent<FireCellMoore2DStochastic>, Polyline> agentPaths;
     private RegularNetMoore2D<FireCellMoore2DStochastic> grid;
     private FireSpreadCAStochastic caFire;
-    private ControllerFireMoore2D modelController;
+    private ControllerFire modelController;
 
     private Group group;
     private Scale sc;
@@ -68,7 +68,7 @@ public class ControllerFX {
 
     @FXML
     public void initialize() {
-        sc = new Scale(30, 30);
+        sc = new Scale(35, 35);
         clickedInit();
         group.getChildren().forEach(
                 o -> o.setOnMouseClicked(mouseEvent -> {
@@ -121,9 +121,9 @@ public class ControllerFX {
             group.getChildren().add(0, path);
         }
 
-        modelController = new ControllerFireMoore2D(this,
+        modelController = new ControllerTAAFire(this,
                 new ArrayList<>() {{  add(grid.get(19, 2));  }},
-                new FireSpreadCAStochastic(grid, 1000), 1000);
+                new FireSpreadCAStochastic(grid, 500), 500);
 
         Thread t = new Thread(() -> {
             try {

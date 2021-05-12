@@ -61,11 +61,14 @@ public class AStar <N extends Node2D<?, Integer>>
     protected void initStructures() {
         parent  = new HashMap<>();
         dist    = new HashMap<>();
-        open    = new PriorityQueue<>(
-                Comparator.comparing(node -> dist.get(node) + H.get(node)));
+        open    = new PriorityQueue<>(openComparator());
         closed  = new HashSet<>();
         H = new HashMap<>();
         graph.getAdjTable().keySet()
                 .forEach(cell -> H.put(cell, Double.NEGATIVE_INFINITY));
+    }
+
+    protected Comparator<N> openComparator() {
+        return Comparator.comparing(node -> dist.get(node) + H.get(node));
     }
 }
