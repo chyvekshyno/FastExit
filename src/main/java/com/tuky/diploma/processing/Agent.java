@@ -3,6 +3,7 @@ package com.tuky.diploma.processing;
 import com.tuky.diploma.pathfinding.Pathfinding;
 import com.tuky.diploma.structures.graph.Node;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Agent<N extends Node<?>> {
@@ -11,6 +12,7 @@ public class Agent<N extends Node<?>> {
 
     public Agent(N position) {
         this.position = position;
+        path = new HashMap<>();
     }
 
     public N getPosition() {

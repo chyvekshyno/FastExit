@@ -1,31 +1,31 @@
 package com.tuky.diploma.processing;
 
-import com.tuky.diploma.camodels.FireCellMoore2DHeat;
+import com.sun.source.tree.Tree;
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
 import com.tuky.diploma.pathfinding.*;
 import com.tuky.diploma.structures.area.regularnet.RegularNetMoore2D;
-import com.tuky.diploma.structures.cellular.CellularAutomata;
+import com.tuky.diploma.structures.graph.Moore2D;
+import com.tuky.diploma.structures.graph.Node2D;
+import com.tuky.diploma.structures.graph.NodeMoore2D;
+import com.tuky.diploma.structures.graph.Transition;
 import com.tuky.diploma.visual.AreaFX;
-import javafx.scene.Group;
-import javafx.scene.shape.Polyline;
+import com.tuky.diploma.visual.ControllerFX;
 import javafx.scene.shape.Shape;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class ControllerFireMoore2D {
+public class ControllerFireMoore2D{
 
     //  region  Fields
     private final RegularNetMoore2D<FireCellMoore2DStochastic> graph;
-    private final Map<Agent<FireCellMoore2DStochastic>, Polyline> agents;
+    private final Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> agentsPathfinding;
     private final List<FireCellMoore2DStochastic> exits;
     private final FireSpreadCAStochastic CA;
-
-    private Pathfinding<FireCellMoore2DStochastic> pathfinding;
+    private final ControllerFX fx;
 
     private final Map<FireCellMoore2DStochastic, Shape> gridFX;
 
@@ -33,32 +33,30 @@ public class ControllerFireMoore2D {
     private final AtomicBoolean processing;
     //endregion
 
-    public ControllerFireMoore2D(RegularNetMoore2D<FireCellMoore2DStochastic> graph,
-                                 Map<FireCellMoore2DStochastic, Shape> gridFX,
-                                 Pathfinding<FireCellMoore2DStochastic> pathfinding,
-                                 List<Agent<FireCellMoore2DStochastic>> agents,
+    public ControllerFireMoore2D(ControllerFX fx,
                                  List<FireCellMoore2DStochastic> exits,
                                  FireSpreadCAStochastic CA,
                                  int ts) {
-        this.graph = graph;
-        this.gridFX = gridFX;
-        this.pathfinding = pathfinding;
-        this.agents = initAgentMap(agents);
+        this.fx = fx;
+        this.graph = fx.getGrid();
         this.exits = exits;
         this.CA = CA;
+        this.gridFX = fx.getGridMap();
+        this.agentsPathfinding = initAgentsPathfinding(fx.getAgentPaths().keySet());
         this.ts = ts;
         processing = new AtomicBoolean(true);
     }
 
-    private Map<Agent<FireCellMoore2DStochastic>, Polyline> initAgentMap(List<Agent<FireCellMoore2DStochastic>> agents) {
-        Map<Agent<FireCellMoore2DStochastic>, Polyline> res = new HashMap<>();
+    private Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> initAgentsPathfinding
+            (Set<Agent<FireCellMoore2DStochastic>> agents) {
+        Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> res = new HashMap<>();
         for (var agent : agents)
-            res.put(agent, new Polyline());
+            res.put(agent, new TreeAAStar<>(graph));
         return res;
     }
 
     public void start() throws InterruptedException {
-        updatePaths();
+        reDraw();
         resume();
     }
 
@@ -67,10 +65,9 @@ public class ControllerFireMoore2D {
     }
 
     public void resume() throws InterruptedException {
-        Thread.sleep(ts);
         processing.set(true);
-        step();
-        while (processing.get() && !agents.isEmpty()) {
+        Thread.sleep(ts);
+        while (processing.get() && !agentsPathfinding.isEmpty()) {
             step();
             Thread.sleep(ts);
         }
@@ -79,61 +76,110 @@ public class ControllerFireMoore2D {
     public void abort() {
         processing.set(false);
         gridFX.clear();
-        agents.clear();
+        agentsPathfinding.clear();
         exits.clear();
     }
 
-    private void step() {
+    public void step() {
+        var changed = stepCA();
+        updatePaths(changed);
         stepAgents();
-        stepCA();
-        updatePaths();
         reDraw();
+        agentsPathfinding.keySet().removeIf(this::isSafe);
+    }
+
+    private void stepAgent(Agent<FireCellMoore2DStochastic> agent) {
+        agent.move();
+
+        Transition<FireCellMoore2DStochastic> tr;
+        System.out.println("---------------------------");
+        for (int i = 0; i < Moore2D.NEIGHBOURS_COUNT; i++) {
+            tr = graph.getAdjTable().get(agent.getPosition()).get(i);
+            if (tr == null) {
+                System.out.println("vec("+i+"):\t" + null);
+                continue;
+            }
+            System.out.println("vec("+i+"):\t" + tr.getWeight());
+        }
+        System.out.println("---------------------------");
     }
 
     private void stepAgents() {
-        try {
-            for (var agentpath : agents.entrySet()) {
-                agentpath.getKey().move();
-                agentpath.getValue().getPoints().remove(0);
+        agentsPathfinding.keySet()
+                .forEach(this::stepAgent);
+    }
+
+    private Set<Transition<FireCellMoore2DStochastic>> stepCA() {
+        CA.nextState();
+        return CA.getChanged();
+    }
+
+    protected boolean updatePathCondition(Agent<FireCellMoore2DStochastic> agent) {
+        return true;
+    }
+
+    protected boolean updatePathConditionTreeAA(Agent<FireCellMoore2DStochastic> agent) {
+        var pathfinding = (TreeAAStar<FireCellMoore2DStochastic>) agentsPathfinding.get(agent);
+        double h_curr = pathfinding.getH()
+                        .get(agent.getPosition());
+        double H_max = pathfinding.getH_max()
+                        .get(pathfinding.getId()
+                            .get(agent.getPosition()));
+
+        System.out.println("=============================");
+        System.out.println("h_curr: " + h_curr);
+        System.out.println("H_max: " + H_max);
+
+        return h_curr >= H_max;
+    }
+
+    private void updateTreeAAStar(TreeAAStar<FireCellMoore2DStochastic> pathfinding,
+                                  Set<Transition<FireCellMoore2DStochastic>> changedCost) {
+        for (Transition<FireCellMoore2DStochastic> tr : changedCost)
+            if (pathfinding.getPathTree().get(tr.getStart()) == tr.getEnd())
+                pathfinding.removePath(tr.getStart());
+    }
+
+    private Thread updatePath(Agent<FireCellMoore2DStochastic> agent,
+                              Set<Transition<FireCellMoore2DStochastic>> changedCost) {
+        if (agentsPathfinding.get(agent) instanceof TreeAAStar) {
+            updateTreeAAStar(
+                    (TreeAAStar<FireCellMoore2DStochastic>) agentsPathfinding.get(agent),
+                    changedCost
+            );
+
+            if (updatePathConditionTreeAA(agent)) {
+                Thread t = new Thread(updatePathRunnable(agent));
+                t.start();
+                return t;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        if (updatePathCondition(agent)) {
+            Thread t = new Thread(updatePathRunnable(agent));
+            t.start();
+            return t;
         }
 
+
+        return null;
     }
 
-    private void stepCA() {
-        CA.nextState();
-    }
-
-    private void updatePaths() {
-        agents.keySet().removeIf(this::isSafe);
-
-        List<Thread> threadList = agents.keySet().stream()
-                                        .map(this::updatePathRunnable)
-                                        .map(Thread::new)
-                                        .collect(Collectors.toList());
-
-        threadList.forEach(Thread::start);
+    private void updatePaths(Set<Transition<FireCellMoore2DStochastic>> changedCost) {
+        var update = agentsPathfinding.keySet().stream()
+                .map(agent -> updatePath(agent, changedCost))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         try {
-            for (Thread thread : threadList)
+            for (Thread thread : update)
                 thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        agents.forEach((key, value) -> {
-            value.getPoints().clear();
-            value.getPoints().addAll(
-                    AreaFX.toJavaFXPathPoints(key.getPath(), key.getPosition())
-            );
-        });
-
     }
 
     private Runnable updatePathRunnable(Agent<FireCellMoore2DStochastic> agent) {
-        return () -> agent.updatePath(new TreeAAStar<>(graph), exits.get(0));
+        return () -> agent.updatePath(agentsPathfinding.get(agent), exits.get(0));
     }
 
     private boolean isSafe(Agent<FireCellMoore2DStochastic> agent) {
@@ -141,11 +187,10 @@ public class ControllerFireMoore2D {
     }
 
     private void reDraw() {
+        agentsPathfinding.keySet().forEach(fx::updatePathFX);
         AreaFX.updateGrid(gridFX,
-                agents.keySet().stream()
-                        .map(Agent::getPosition)
+                agentsPathfinding.keySet().stream().map(Agent::getPosition)
                         .collect(Collectors.toList()),
                 exits);
     }
-
 }

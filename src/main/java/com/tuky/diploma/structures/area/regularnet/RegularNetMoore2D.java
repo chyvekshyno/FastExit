@@ -7,9 +7,7 @@ import com.tuky.diploma.structures.graph.Moore2D;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 import com.tuky.diploma.structures.graph.Transition;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class RegularNetMoore2D
         <N extends NodeMoore2D<? extends Comparable<?>, Integer>>
@@ -44,7 +42,6 @@ public abstract class RegularNetMoore2D
 
             neighbour = tranList.get(vec).getEnd();
             adjTable.get(neighbour).set(Moore2D.vecReverse(vec), null);
-            tranList.set(vec, null);
         }
     }
 
@@ -52,5 +49,24 @@ public abstract class RegularNetMoore2D
     protected void initCellNodeEntry(N node) {
         this.adjTable.put(node, new ArrayList<>(Collections
                 .nCopies(NodeMoore2D.NEIGHBOURS_COUNT, null)));
+    }
+
+    @Override
+    public Set<Transition<N>> isolate(N node) {
+        List<Transition<N>> tranList = adjTable.get(node);
+        N neighbour;
+        Set<Transition<N>> set = new HashSet<>();
+        for (int vec = 0; vec < Moore2D.NEIGHBOURS_COUNT; vec++) {
+            if (tranList.get(vec) == null)
+                continue;
+
+            neighbour = tranList.get(vec).getEnd();
+            adjTable.get(neighbour).get(Moore2D.vecReverse(vec)).setWeight(10000.);
+            tranList.get(vec).setWeight(10000.);
+
+            set.add(adjTable.get(neighbour).get(Moore2D.vecReverse(vec)));
+            set.add(tranList.get(vec));
+        }
+        return set;
     }
 }

@@ -34,7 +34,7 @@ public class AreaFX {
     }
 
     public static Circle toJavaFXUnitCircle(Node2D<Double, Integer> cell){
-        return new Circle(cell.getCoord().X(), cell.getCoord().Y(), 0.05);
+        return new Circle(cell.getCoord().X(), cell.getCoord().Y(), 0.1);
 
     }
 
@@ -85,10 +85,9 @@ public class AreaFX {
 
     public static <N extends Node2D<?, Integer>> List<Double> toJavaFXPathPoints
             (Map<N,N> next, N start) {
-        List<Double> points = new ArrayList<>() {{  add((double) start.getCoord().X());
-                                                    add((double) start.getCoord().Y());  }};
+        List<Double> points = new ArrayList<>();
 
-        N curr = next.get(start);
+        N curr = start;
         while (curr != null) {
             points.add((double) curr.getCoord().X());
             points.add((double) curr.getCoord().Y());
@@ -156,6 +155,6 @@ public class AreaFX {
     private static void paintCellExit(Shape cell) {
         cell.setFill(COLOR_EXIT_CELL);
         cell.setStroke(COLOR_EXIT_CELL);
-        cell.setStrokeWidth(1.2);
+        cell.setStrokeWidth(0.5);
     }
 }

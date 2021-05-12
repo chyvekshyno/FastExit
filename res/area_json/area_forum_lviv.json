@@ -1,0 +1,35 @@
+{
+  "areaName" : "forum_lviv",
+  "zones" : [
+    {
+      "zoneName" : "room0",
+      "len" : 1.0,
+      "shape" : [
+        { "type" : "l", "coord" : [10, 10]    },
+        { "type" : "l", "coord" : [15, 20]    },
+        { "type" : "l", "coord" : [20, 20]    },
+        { "type" : "l", "coord" : [20, 30]    },
+        { "type" : "l", "coord" : [40, 30]    },
+        { "type" : "l", "coord" : [40, 20]    },
+        { "type" : "e", "coord" : [40, 15], "vec" : "r" },
+        { "type" : "l", "coord" : [40, 10]    },
+        { "type" : "l", "coord" : [10, 10]    }
+      ]
+    }, {
+      "zoneName" : "room0",
+      "len" : 1.0,
+      "shape" : [
+        { "type" : "l", "coord" : [40,  5]    },
+        { "type" : "l", "coord" : [40, 15]    },
+        { "type" : "e", "coord" : [40, 20], "vec" : "l" },
+        { "type" : "l", "coord" : [40, 40]    },
+        { "type" : "l", "coord" : [50, 40]    },
+        { "type" : "l", "coord" : [50,  5]    },
+        { "type" : "l", "coord" : [40,  5]    }
+      ]
+    }
+  ],
+  "exits" : [
+    [0, 0, 1, 0]
+  ]
+}

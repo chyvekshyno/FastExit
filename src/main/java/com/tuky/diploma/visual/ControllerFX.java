@@ -1,7 +1,6 @@
 package com.tuky.diploma.visual;
 
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
-import com.tuky.diploma.camodels.FireSpreadCAHeat;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
 import com.tuky.diploma.pathfinding.AdaptiveAStar;
 import com.tuky.diploma.processing.Agent;
@@ -10,18 +9,19 @@ import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.AreaJSONParser;
 import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
 import com.tuky.diploma.structures.area.regularnet.RegularNetMoore2D;
-import com.tuky.diploma.structures.graph.Node;
 import com.tuky.diploma.structures.graph.Node2D;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
 import org.json.simple.parser.ParseException;
@@ -37,21 +37,63 @@ public class ControllerFX {
 
     @FXML   private Button btn_start;
     @FXML   private Button btn_resume;
-    @FXML   private Button btn_stop;
+    @FXML   private Button btn_pause;
+    @FXML   private Button btn_step;
     @FXML   private Button btn_abort;
     @FXML   private Pane pane_draw;
     @FXML   private VBox vbox_controller;
 
-    public static final String PATH_AREA = "res\\area_json\\area1.json";
+    public static final String PATH_AREA = "res\\area_json\\area_simple_rectangle.json";
 
     private Map<FireCellMoore2DStochastic, Shape> gridMap;
+    private Map<Agent<FireCellMoore2DStochastic>, Polyline> agentPaths;
     private RegularNetMoore2D<FireCellMoore2DStochastic> grid;
     private FireSpreadCAStochastic caFire;
     private ControllerFireMoore2D modelController;
 
+    private Group group;
+    private Scale sc;
+
+    public Map<FireCellMoore2DStochastic, Shape> getGridMap() {
+        return gridMap;
+    }
+
+    public Map<Agent<FireCellMoore2DStochastic>, Polyline> getAgentPaths() {
+        return agentPaths;
+    }
+
+    public RegularNetMoore2D<FireCellMoore2DStochastic> getGrid() {
+        return grid;
+    }
+
     @FXML
     public void initialize() {
+        sc = new Scale(30, 30);
         clickedInit();
+        group.getChildren().forEach(
+                o -> o.setOnMouseClicked(mouseEvent -> {
+                    if (mouseEvent.getButton() == MouseButton.SECONDARY)
+                        clickedPaneObject(o);
+                }));
+    }
+
+    private void clickedPaneObject(Node o) {
+        Shape s = (Shape) o;
+        gridMap.entrySet().stream()
+                .filter(entry -> entry.getValue() == s)
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .ifPresent(cell -> {
+                    cell.setFire();
+                    getGrid().isolate(cell);
+                });
+
+    }
+
+    private void paintBlocked(Shape shape) {
+        shape.setFill(Color.BLACK);
+        shape.setStroke(Color.BLACK);
+        shape.setStrokeWidth(0.4);
     }
 
     @FXML
@@ -59,26 +101,32 @@ public class ControllerFX {
         initGridMap(PATH_AREA);
         btn_start.setDisable(false);
         btn_resume.setDisable(true);
-        btn_stop.setDisable(true);
+        btn_pause.setDisable(true);
+        btn_step.setDisable(true);
         btn_abort.setDisable(true);
     }
 
     @FXML
     public void clickedStart() {
-        btn_stop.setDisable(false);
+        btn_pause.setDisable(false);
+        agentPaths = new HashMap<>() {
+            {
+                put(new Agent<>(grid.get(2, 4)), new Polyline());
+            }
+        };
 
-        modelController = new ControllerFireMoore2D(grid,
-                gridMap,
-                new AdaptiveAStar<>(grid),
-                new ArrayList<>() {{  add(new Agent<>(grid.get(13, 13)));
-                    add(new Agent<>(grid.get(30, 25)));  }},
-                new ArrayList<>() {{  add(grid.get(45, 35));  }},
-                new FireSpreadCAStochastic(grid, 1000),
-                200);
+        for (var path : agentPaths.values()) {
+            AreaFX.paintPath(path);
+            path.getTransforms().add(sc);
+            group.getChildren().add(0, path);
+        }
+
+        modelController = new ControllerFireMoore2D(this,
+                new ArrayList<>() {{  add(grid.get(19, 2));  }},
+                new FireSpreadCAStochastic(grid, 1000), 1000);
 
         Thread t = new Thread(() -> {
             try {
-                grid.get(45,7).setFire();
                 modelController.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -89,6 +137,7 @@ public class ControllerFX {
         btn_resume.setDisable(true);
         btn_abort.setDisable(false);
         btn_start.setDisable(true);
+        btn_step.setDisable(true);
     }
 
     @FXML
@@ -102,14 +151,22 @@ public class ControllerFX {
         });
 
         btn_resume.setDisable(true);
-        btn_stop.setDisable(false);
+        btn_pause.setDisable(false);
+        btn_step.setDisable(true);
         t.start();
     }
+
     @FXML
-    public void clickedStop() {
+    public void clickedPause() {
         modelController.stop();
         btn_resume.setDisable(false);
-        btn_stop.setDisable(true);
+        btn_pause.setDisable(true);
+        btn_step.setDisable(false);
+    }
+
+    @FXML
+    public void clickedStep() {
+        modelController.step();
     }
 
     @FXML
@@ -119,7 +176,7 @@ public class ControllerFX {
 
         btn_start.setDisable(false);
         btn_resume.setDisable(true);
-        btn_stop.setDisable(true);
+        btn_pause.setDisable(true);
         btn_abort.setDisable(true);
     }
 
@@ -127,7 +184,7 @@ public class ControllerFX {
         pane_draw.getChildren().clear();
 
         gridMap = new HashMap<>();
-        Group group = new Group();
+        group = new Group();
         pane_draw.getChildren().add(group);
 
         try {
@@ -140,7 +197,7 @@ public class ControllerFX {
             e.printStackTrace();
         }
 
-        scale(group, new Scale(10,10));
+        scale(group, sc);
     }
 
     //  get anonymous class
@@ -216,6 +273,12 @@ public class ControllerFX {
 
     public void drawPath (List<? extends Node2D<Double,Integer>> path, Group group) {
         group.getChildren().addAll(AreaFX.getPolylinePath(path));
+    }
+
+    public void updatePathFX (Agent<FireCellMoore2DStochastic> agent) {
+        agentPaths.get(agent).getPoints().clear();
+        agentPaths.get(agent).getPoints().addAll(
+                AreaFX.toJavaFXPathPoints(agent.getPath(), agent.getPosition()));
     }
 
 }

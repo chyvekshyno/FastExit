@@ -446,4 +446,28 @@ public abstract class RegularNet2D
 
     //endregion
     //endregion
+
+    public Set<Transition<N>> isolate(N node) {
+        List<Transition<N>> tranList = adjTable.get(node);
+        N neighbour;
+
+        Set<Transition<N>> set = new HashSet<>();
+        for (Transition<N> nTransition : tranList) {
+            if (nTransition == null)
+                continue;
+
+            neighbour = nTransition.getEnd();
+            adjTable.get(neighbour).stream()
+                    .filter(tr -> tr.getEnd() == node)
+                    .findFirst()
+                    .ifPresent(tr -> {
+                        tr.setWeight(10000.);
+                        set.add(tr);
+                    });
+
+            nTransition.setWeight(10000.);
+            set.add(nTransition);
+        }
+        return set;
+    }
 }

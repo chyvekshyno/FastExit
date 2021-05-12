@@ -5,15 +5,20 @@ import com.tuky.diploma.structures.cellular.CellularAutomata;
 import com.tuky.diploma.structures.graph.Moore2D;
 import com.tuky.diploma.structures.graph.Transition;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FireSpreadCAStochastic
         extends CellularAutomata<FireCellMoore2DStochastic> {
 
     private final double unitTime;
+
+    public Set<Transition<FireCellMoore2DStochastic>> getChanged() {
+        var re = new HashSet<>(changed);
+        changed.clear();
+        return re;
+    }
+
+    private final Set<Transition<FireCellMoore2DStochastic>> changed;
 
     public double getUnitTime() {
         return unitTime;
@@ -22,6 +27,7 @@ public class FireSpreadCAStochastic
     public FireSpreadCAStochastic(RegularNet2D<FireCellMoore2DStochastic> grid, double unitTime) {
         super(grid);
         this.unitTime = unitTime;
+        changed = new HashSet<>();
     }
 
 
@@ -33,7 +39,9 @@ public class FireSpreadCAStochastic
             newStates.put(cell, nextCellState(cell));
 
         for (var cell: getGrid().getAdjTable().keySet()) {
-            cell.next(newStates.get(cell));
+            if (cell.next(newStates.get(cell))) {
+                changed.addAll(grid.isolate(cell));
+            }
         }
 
         nextGen();

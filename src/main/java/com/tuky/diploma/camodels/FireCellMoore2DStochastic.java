@@ -13,17 +13,18 @@ public class FireCellMoore2DStochastic
     private final double KOEF_IGNITE;
     private final double TIME_BURN;
 
+    private boolean ignite;
 
     public enum FireCellState{
         FUEL    ,
         NonFUEL ,
         BURNED  ,
         FIRE;
+
     }
     public FireCellState getState() {
         return state;
     }
-
     public FireCellMoore2DStochastic(Coord<Integer> coord) {
         this(coord, 0.5, 100000, FireCellState.FUEL);
     }
@@ -34,28 +35,36 @@ public class FireCellMoore2DStochastic
         this.KOEF_IGNITE = koef_ignite;
         this.TIME_BURN = burnTime;
         setValue(0.);
+        ignite = false;
     }
 
     public double KOEF_IGNITE() {
         return KOEF_IGNITE;
     }
 
-    public void next(double value) {
+    public boolean next(double value) {
         if (state == FireCellState.FUEL) {
-            fuel_fire(value);
+            return fuel_fire(value);
         }
         else if (state == FireCellState.FIRE)
             fire_burn(value);
+        return false;
     }
 
-    private void fuel_fire(double value) {
+    private boolean fuel_fire(double value) {
         if (Math.random() < value)
-            setFire();
+            return setFire();
+        return false;
     }
 
-    public void setFire() {
+    public boolean setFire() {
         state = FireCellState.FIRE;
         setValue(1.);
+        return true;
+    }
+
+    public boolean isIgnite() {
+        return ignite;
     }
 
     private void fire_burn(double time) {

@@ -3,6 +3,7 @@ package com.tuky.diploma.structures.graph;
 public class Transition<N extends Node<?>> {
     private final N start;
     private final N end;
+
     private double weight;
 
     public Transition(N start, N end) {
@@ -25,6 +26,10 @@ public class Transition<N extends Node<?>> {
 
     public double getWeight() {
         return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 
     @Override

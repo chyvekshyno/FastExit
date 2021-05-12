@@ -1,10 +1,8 @@
 package com.tuky.diploma.pathfinding;
 
-import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.structures.graph.Graph;
 import com.tuky.diploma.structures.graph.Node2D;
 
-import java.util.List;
 import java.util.Map;
 
 public class AdaptiveAStar<N extends Node2D<?, Integer>>
@@ -18,10 +16,8 @@ public class AdaptiveAStar<N extends Node2D<?, Integer>>
         return new AdaptiveAStar<>(graph).path(source, target);
     }
 
-    protected void updateH() {
-        for (var node : closed) {
-            H.put(node, dist.get(target) + H.get(target) - dist.get(node));
-        }
+    protected void updateH(N curr) {
+        closed.forEach(node -> H.put(node, dist.get(curr) + H.get(curr) - dist.get(node)));
     }
 
     @Override
@@ -31,15 +27,10 @@ public class AdaptiveAStar<N extends Node2D<?, Integer>>
             current = open.poll();
             process(current, dist, parent, open, closed);
             if (current == target) {
-                updateH();
+                updateH(current);
                 return pathTraceback(source, current, parent);
             }
         }
         return null;
-    }
-
-    @Override
-    protected void initData(N source, N target) {
-        super.initData(source, target);
     }
 }

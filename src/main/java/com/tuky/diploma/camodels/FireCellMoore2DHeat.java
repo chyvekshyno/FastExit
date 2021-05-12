@@ -62,12 +62,14 @@ public class FireCellMoore2DHeat
         return 0.;
     }
 
-    public void next(double value) {
+    public boolean next(double value) {
         if (state == FireCellState.FUEL) {
             fuel_fire(value);
         }
         else if (state == FireCellState.FIRE)
             fire_burn(value);
+
+        return false;
     }
 
     private void fuel_fire(double value) {

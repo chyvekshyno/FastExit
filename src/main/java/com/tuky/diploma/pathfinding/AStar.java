@@ -15,6 +15,10 @@ public class AStar <N extends Node2D<?, Integer>>
         super(graph);
     }
 
+    public Map<N, Double> getH() {
+        return H;
+    }
+
     public static <N extends Node2D<?,Integer>> Map<N, N> path (Graph<N> graph, N source, N target) {
         return new AStar<>(graph).path(source, target);
     }
@@ -63,10 +67,5 @@ public class AStar <N extends Node2D<?, Integer>>
         H = new HashMap<>();
         graph.getAdjTable().keySet()
                 .forEach(cell -> H.put(cell, Double.NEGATIVE_INFINITY));
-    }
-
-    @Override
-    protected void initData(N source, N target) {
-        super.initData(source, target);
     }
 }
