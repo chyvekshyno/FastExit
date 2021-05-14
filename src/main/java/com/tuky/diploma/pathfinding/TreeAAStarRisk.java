@@ -26,43 +26,9 @@ public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
         this.R = riskMap;
     }
 
-    //region    GETTER's n SETTER's
-
-    public double getRiskWeight() {
-        return riskW;
-    }
-
-    public void setRiskWeight(double riskW) {
-        this.riskW = riskW;
-    }
-
-    public double getDistWeight() {
-        return distW;
-    }
-
-    public void setDistWeight(double distW) {
-        this.distW = distW;
-    }
-
-    public double getDangerRadius() {
-        return dangerR;
-    }
-
-    public void setDangerRadius(double dangerR) {
-        this.dangerR = dangerR;
-    }
-    //endregion
-
-    //region    OVERRIDING
-
     @Override
-    protected void clearData() {
-        super.clearData();
-    }
-
-    @Override
-    protected void initStructures() {
-        super.initStructures();
+    protected void updateH(N curr) {
+        closed.forEach(node -> H.put(node, dist.get(curr) + distW * H.get(curr) - dist.get(node) + riskW * R.get(curr)));
     }
 
     @Override
@@ -72,9 +38,4 @@ public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
                                             + riskW * R.get(node));
     }
 
-    @Override
-    protected void initNode(N node) {
-        super.initNode(node);
-    }
-    //endregion
 }

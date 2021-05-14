@@ -39,9 +39,11 @@ public class ControllerTAAFire extends ControllerFire {
 
     protected void updateTreeAAStar(TreeAAStar<FireCellMoore2DStochastic> pathfinding,
                                     Set<FireCellMoore2DStochastic> changedCost) {
-        for (var node : changedCost)
-            if (pathfinding.getPathTree().containsKey(node))
+        for (var node : changedCost) {
+            if (pathfinding.getPathTree().containsKey(node)) {
                 pathfinding.removePath(node);
+            }
+        }
     }
 
     @Override

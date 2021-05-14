@@ -17,6 +17,10 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     protected Map<Integer, Double> H_max;
     protected Map<Integer, Double> H_min;
 
+
+    public Set<N> getClosed() {
+        return closed;
+    }
     public int getCounter() {
         return counter;
     }
@@ -86,7 +90,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     @Override
     protected void clearData() {
         dist = new HashMap<>();
-        closed = new HashSet<>();
+        closed.clear();
         open = new PriorityQueue<>(openComparator());
         parent.clear();
     }
@@ -94,31 +98,53 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     @Override
     protected Map<N, N> algorithm(N source, N target) {
         N current;
+        int i = 1;
         while (!open.isEmpty()) {
             current = open.poll();
             if (current == target) {
-                System.out.println("To TARGET");
+                System.out.println("\n--------To TARGET--------");
+                System.out.println("counter:\t" + getCounter());
+                System.out.println("coords =\t" + current.getCoord().X() + "," + current.getCoord().Y());
+                System.out.println("iterations:\t" + i);
                 updateH(current);
                 addPath(current);
                 return pathTree;
             }
             if (H.get(current) <= H_max.get(Id.get(current))) {
-                System.out.println("To TREE");
+                System.out.println("\n--------To TREE--------");
+                System.out.println("counter:\t" + getCounter());
+                System.out.print("coords =\t" + current.getCoord().X() + "_" + current.getCoord().Y());
+                N tmp = pathTree.get(current);
+                for (int j = 0; j < 10; j++){
+                    if (tmp == null) {
+                        System.out.print(" -> null");
+                        break;
+                    }
+                    System.out.print(" -> " + tmp.getCoord().X() + "_" + tmp.getCoord().Y());
+                    if (tmp == target) {
+                        System.out.print(" -> " + tmp.getCoord().X() + "_" + tmp.getCoord().Y() + " = target");
+                        break;
+                    }
+                    tmp = pathTree.get(tmp);
+                }
+                System.out.println("");
+                System.out.println("iterations:\t" + i);
                 System.out.println("H_current:\t" + H.get(current));
+                System.out.println("Id_current:\t" + Id.get(current));
                 System.out.println("H_max_current:\t" + H_max.get(Id.get(current)));
                 updateH(current);
                 addPath(current);
                 return pathTree;
             }
             process(current, dist, parent, open, closed);
+            i++;
         }
         return null;
     }
 
     private void addPath(N curr) {
-//        System.out.println("counter:\t" + counter);
-//        System.out.println("Id_curr:\t" + Id.get(curr));
-//        System.out.println("-------------------------");
+//        System.out.println("--------------Add-----------------");
+//        System.out.println("coords =\t" + curr.getCoord().X() + "," + curr.getCoord().Y());
 
         if (curr != target)
             paths.get(Id.get(curr)).add(counter);
@@ -127,7 +153,6 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         H_max.put(counter, H.get(source));
         paths.put(counter, new ArrayList<>());
 
-        System.out.println("---------Path-----------");
         N next;
         while (curr != source) {
             next = curr;
@@ -138,6 +163,9 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     }
 
     public void removePath(N curr) {
+        if (pathTree.get(curr) == null)    //  remove's target
+            return;
+
         int pathCurr = Id.get(curr);
         if (H_max.get(pathCurr) > H.get(pathTree.get(curr)))
             H_max.put(pathCurr, H.get(pathTree.get(curr)));
@@ -152,12 +180,12 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         int path;
         while (!queue.isEmpty()) {
             path = queue.poll();
-            H_max.put(path, 0.);
-            H_min.put(path, 0.);
-            queue.addAll(paths.get(path));
-            paths.get(path).clear();
-//            if (H_max.get(path) > H_min.get(path)) {
-//            }
+            if (H_max.get(path) > H_min.get(path)) {
+                H_max.put(path, 0.);
+                H_min.put(path, 0.);
+                queue.addAll(paths.get(path));
+                paths.get(path).clear();
+            }
         }
     }
 }

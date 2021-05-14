@@ -87,7 +87,7 @@ public class AreaFX {
             (Map<N,N> next, N start) {
         List<Double> points = new ArrayList<>();
 
-        System.out.println("Map size:" + next.size());
+//        System.out.println("Map size:" + next.size());
 
         N curr = start;
         while (curr != null) {
