@@ -6,9 +6,9 @@
       "len" : 1.0,
       "shape" : [
         { "type" : "l", "coord" : [1, 1]    },
-        { "type" : "l", "coord" : [20, 1]   },
-        { "type" : "l", "coord" : [20, 10]  },
-        { "type" : "l", "coord" : [1, 10]   },
+        { "type" : "l", "coord" : [40, 1]   },
+        { "type" : "l", "coord" : [40, 20]  },
+        { "type" : "l", "coord" : [1, 20]   },
         { "type" : "l", "coord" : [1, 1]    },
       ]
     }

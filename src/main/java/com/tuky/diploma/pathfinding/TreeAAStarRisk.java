@@ -2,11 +2,11 @@ package com.tuky.diploma.pathfinding;
 
 import com.tuky.diploma.structures.addition.Risk;
 import com.tuky.diploma.structures.graph.Graph;
-import com.tuky.diploma.structures.graph.Node2D;
+import com.tuky.diploma.structures.graph.NodeMoore2D;
 
 import java.util.*;
 
-public class TreeAAStarRisk <N extends Node2D<?, Integer> & Risk>
+public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
         extends TreeAAStar<N>  {
 
     protected double riskW;
@@ -15,13 +15,15 @@ public class TreeAAStarRisk <N extends Node2D<?, Integer> & Risk>
     protected Map<N, Double> R;
 
     public TreeAAStarRisk(Graph<N> graph,
+                          Map<N, Double> riskMap,
+                          double dangerRadius,
                           double riskWeight,
-                          double distanceWeight,
-                          double dangerRadius) {
+                          double distanceWeight) {
         super(graph);
         this.riskW = riskWeight;
         this.distW = distanceWeight;
         this.dangerR = dangerRadius;
+        this.R = riskMap;
     }
 
     //region    GETTER's n SETTER's
@@ -56,66 +58,23 @@ public class TreeAAStarRisk <N extends Node2D<?, Integer> & Risk>
     @Override
     protected void clearData() {
         super.clearData();
-        R = new HashMap<>();
     }
 
     @Override
     protected void initStructures() {
         super.initStructures();
-        R = new HashMap<>();
-        open = new PriorityQueue<>(Comparator
-                .comparing(node -> dist.get(node) + H.get(node) + R.get(node)));
-
     }
 
     @Override
-    protected void initData(N source, N target) {
-        super.initData(source, target);
+    protected Comparator<N> openComparator() {
+        return Comparator.comparing(node -> dist.get(node)
+                                            + distW * H.get(node)
+                                            + riskW * R.get(node));
     }
 
     @Override
     protected void initNode(N node) {
         super.initNode(node);
-        R.put(node, risk(node));
-    }
-    //endregion
-
-    //region  RISK CALCULATING
-
-    protected double risk(N curr) {
-        double risk = 0.;
-        for (var damageNode : riskCovered(curr))
-            risk += damage(curr, damageNode);
-        return risk;
-    }
-
-    protected List<N> riskCovered(N node) {
-        List<N> damageNodes = new ArrayList<>();
-        Queue<N> queue = new LinkedList<>();
-
-        for (var tr : graph.getAdjTable().get(node)) {
-            if (tr == null) continue;
-            queue.add(tr.getEnd());
-        }
-
-        N curr;
-        while (!queue.isEmpty()) {
-            curr = queue.poll();
-            if (potential(node, curr) < dangerR) {
-                damageNodes.add(curr);
-                for (var tr : graph.getAdjTable().get(curr)) {
-                    if (tr == null) continue;
-                    queue.add(tr.getEnd());
-                }
-            }
-        }
-
-        return damageNodes;
-    }
-
-    protected double damage(N curr, N danger) {
-        return danger.getMaxDamage() *
-                (1 - potential(curr, danger) / dangerR);
     }
     //endregion
 }

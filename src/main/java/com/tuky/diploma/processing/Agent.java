@@ -26,7 +26,7 @@ public class Agent<N extends Node<?>> {
     public void move(){
         N temp = position;
         position = path.get(position);
-        path.remove(temp);
+//        path.remove(temp);
     }
 
     public void updatePath(Pathfinding<N> pathfinding, N target) {

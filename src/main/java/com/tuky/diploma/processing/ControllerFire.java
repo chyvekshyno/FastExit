@@ -37,17 +37,16 @@ public class ControllerFire{
         this.exits = exits;
         this.CA = CA;
         this.gridFX = fx.getGridMap();
-        this.agentsPathfinding = initAgentsPathfinding(fx.getAgentPaths().keySet());
+        this.agentsPathfinding = new HashMap<>();
         this.ts = ts;
         processing = new AtomicBoolean(true);
+        initAgentsPathfinding(fx.getAgentPaths().keySet());
     }
 
-    protected Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> initAgentsPathfinding
+    protected void initAgentsPathfinding
             (Set<Agent<FireCellMoore2DStochastic>> agents) {
-        Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> res = new HashMap<>();
         for (var agent : agents)
-            res.put(agent, choosePathfinding(graph));
-        return res;
+            agentsPathfinding.put(agent, choosePathfinding(graph));
     }
 
     protected Pathfinding<FireCellMoore2DStochastic> choosePathfinding
@@ -98,7 +97,7 @@ public class ControllerFire{
                 .forEach(this::stepAgent);
     }
 
-    protected Set<Transition<FireCellMoore2DStochastic>> stepCA() {
+    protected Set<FireCellMoore2DStochastic> stepCA() {
         CA.nextState();
         return CA.getChanged();
     }
@@ -114,7 +113,7 @@ public class ControllerFire{
     }
 
     protected Thread updatePath(Agent<FireCellMoore2DStochastic> agent,
-                              Set<Transition<FireCellMoore2DStochastic>> changedCost) {
+                              Set<FireCellMoore2DStochastic> changedCost) {
 
         if (updatePathCondition(agent)) {
             return updatePath(agent);
@@ -136,7 +135,7 @@ public class ControllerFire{
         }
     }
 
-    protected void updatePaths(Set<Transition<FireCellMoore2DStochastic>> changedCost) {
+    protected void updatePaths(Set<FireCellMoore2DStochastic> changedCost) {
         var update = agentsPathfinding.keySet().stream()
                 .map(agent -> updatePath(agent, changedCost))
                 .filter(Objects::nonNull)

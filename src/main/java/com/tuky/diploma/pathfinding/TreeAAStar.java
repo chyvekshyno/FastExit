@@ -50,7 +50,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     protected void initNode(N node) {
         if (generated.get(node) == 0) {
             dist.put(node, Double.POSITIVE_INFINITY);
-            super.initNode(node);
+            H.put(node, potential(node, target));
         } else if (generated.get(node) != counter) {
             dist.put(node, Double.POSITIVE_INFINITY);
         }
@@ -80,6 +80,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         initNode(source);
         dist.put(source, 0.);
         open.add(source);
+        pathTree.put(target, null);
     }
 
     @Override
@@ -87,6 +88,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         dist = new HashMap<>();
         closed = new HashSet<>();
         open = new PriorityQueue<>(openComparator());
+        parent.clear();
     }
 
     @Override
@@ -94,7 +96,16 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         N current;
         while (!open.isEmpty()) {
             current = open.poll();
-            if (current == target || H.get(current) <= H_max.get(Id.get(current))) {
+            if (current == target) {
+                System.out.println("To TARGET");
+                updateH(current);
+                addPath(current);
+                return pathTree;
+            }
+            if (H.get(current) <= H_max.get(Id.get(current))) {
+                System.out.println("To TREE");
+                System.out.println("H_current:\t" + H.get(current));
+                System.out.println("H_max_current:\t" + H_max.get(Id.get(current)));
                 updateH(current);
                 addPath(current);
                 return pathTree;
@@ -105,6 +116,10 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     }
 
     private void addPath(N curr) {
+//        System.out.println("counter:\t" + counter);
+//        System.out.println("Id_curr:\t" + Id.get(curr));
+//        System.out.println("-------------------------");
+
         if (curr != target)
             paths.get(Id.get(curr)).add(counter);
 
@@ -112,6 +127,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         H_max.put(counter, H.get(source));
         paths.put(counter, new ArrayList<>());
 
+        System.out.println("---------Path-----------");
         N next;
         while (curr != source) {
             next = curr;
@@ -133,15 +149,15 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
 
         paths.get(pathCurr).removeAll(queue);
 
-
         int path;
         while (!queue.isEmpty()) {
             path = queue.poll();
-            if (H_max.get(path) > H_min.get(path)) {
-                H_max.put(path, H_min.get(path));
-                queue.addAll(paths.get(path));
-                paths.get(pathCurr).removeAll(paths.get(path));
-            }
+            H_max.put(path, 0.);
+            H_min.put(path, 0.);
+            queue.addAll(paths.get(path));
+            paths.get(path).clear();
+//            if (H_max.get(path) > H_min.get(path)) {
+//            }
         }
     }
 }

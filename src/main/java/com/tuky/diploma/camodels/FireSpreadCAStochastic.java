@@ -12,19 +12,20 @@ public class FireSpreadCAStochastic
 
     private final double unitTime;
 
-    public Set<Transition<FireCellMoore2DStochastic>> getChanged() {
-        var re = new HashSet<>(changed);
-        changed.clear();
-        return re;
-    }
-
-    private final Set<Transition<FireCellMoore2DStochastic>> changed;
+    private final Set<FireCellMoore2DStochastic> changed;
 
     public double getUnitTime() {
         return unitTime;
     }
 
-    public FireSpreadCAStochastic(RegularNet2D<FireCellMoore2DStochastic> grid, double unitTime) {
+    public Set<FireCellMoore2DStochastic> getChanged() {
+        var re = new HashSet<>(changed);
+        changed.clear();
+        return re;
+    }
+
+    public FireSpreadCAStochastic(RegularNet2D<FireCellMoore2DStochastic> grid,
+                                  double unitTime) {
         super(grid);
         this.unitTime = unitTime;
         changed = new HashSet<>();
@@ -40,7 +41,8 @@ public class FireSpreadCAStochastic
 
         for (var cell: getGrid().getAdjTable().keySet()) {
             if (cell.next(newStates.get(cell))) {
-                changed.addAll(grid.isolate(cell));
+                grid.isolate(cell);
+                changed.add(cell);
             }
         }
 

@@ -34,24 +34,19 @@ public class ControllerTAAFire extends ControllerFire {
         double H_max = pathfinding.getH_max()
                 .get(pathfinding.getId()
                         .get(agent.getPosition()));
-
-        System.out.println("=============================");
-        System.out.println("h_curr: " + h_curr);
-        System.out.println("H_max: " + H_max);
-
         return h_curr >= H_max;
     }
 
     protected void updateTreeAAStar(TreeAAStar<FireCellMoore2DStochastic> pathfinding,
-                                    Set<Transition<FireCellMoore2DStochastic>> changedCost) {
-        for (Transition<FireCellMoore2DStochastic> tr : changedCost)
-            if (pathfinding.getPathTree().get(tr.getStart()) == tr.getEnd())
-                pathfinding.removePath(tr.getStart());
+                                    Set<FireCellMoore2DStochastic> changedCost) {
+        for (var node : changedCost)
+            if (pathfinding.getPathTree().containsKey(node))
+                pathfinding.removePath(node);
     }
 
     @Override
     protected Thread updatePath(Agent<FireCellMoore2DStochastic> agent,
-                                Set<Transition<FireCellMoore2DStochastic>> changedCost) {
+                                Set<FireCellMoore2DStochastic> changedCost) {
 
         updateTreeAAStar(
                 (TreeAAStar<FireCellMoore2DStochastic>) agentsPathfinding.get(agent),

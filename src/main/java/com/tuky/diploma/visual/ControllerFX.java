@@ -5,6 +5,7 @@ import com.tuky.diploma.camodels.FireSpreadCAStochastic;
 import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.processing.ControllerFire;
 import com.tuky.diploma.processing.ControllerTAAFire;
+import com.tuky.diploma.processing.ControllerTAARiskFire;
 import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.AreaJSONParser;
 import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
@@ -68,7 +69,7 @@ public class ControllerFX {
 
     @FXML
     public void initialize() {
-        sc = new Scale(35, 35);
+        sc = new Scale(25, 25);
         clickedInit();
         group.getChildren().forEach(
                 o -> o.setOnMouseClicked(mouseEvent -> {
@@ -111,7 +112,7 @@ public class ControllerFX {
         btn_pause.setDisable(false);
         agentPaths = new HashMap<>() {
             {
-                put(new Agent<>(grid.get(2, 4)), new Polyline());
+                put(new Agent<>(grid.get(2, 3)), new Polyline());
             }
         };
 
@@ -121,9 +122,10 @@ public class ControllerFX {
             group.getChildren().add(0, path);
         }
 
-        modelController = new ControllerTAAFire(this,
-                new ArrayList<>() {{  add(grid.get(19, 2));  }},
-                new FireSpreadCAStochastic(grid, 500), 500);
+        modelController = new ControllerTAARiskFire(this,
+                new ArrayList<>() {{  add(grid.get(37, 3));  }},
+                new FireSpreadCAStochastic(grid, 200), 10.0,
+                200);
 
         Thread t = new Thread(() -> {
             try {
@@ -200,6 +202,38 @@ public class ControllerFX {
         scale(group, sc);
     }
 
+    private void scale(Parent p, Scale scale) {
+        p.getChildrenUnmodifiable().forEach(o -> o.getTransforms().add(scale));
+    }
+
+    private void drawBounds(Area area, Group group) {
+        var lines = AreaFX.areaJavaFXLines(area);
+        lines.forEach(AreaFX::paintBoundLine);
+        group.getChildren().addAll(lines);
+    }
+
+    private void drawGridInit (RegularNet2D<FireCellMoore2DStochastic> grid, Group group) {
+        Circle circle;
+        for (var cell : grid.getAdjTable().keySet()) {
+            cell.setValue(0.);
+            circle = AreaFX.toJavaFXUnitCircle(cell);
+            gridMap.put(cell, circle);
+
+            AreaFX.paintGridCell(circle);
+            group.getChildren().add(circle);
+        }
+    }
+
+    public void drawPath (List<? extends Node2D<Double,Integer>> path, Group group) {
+        group.getChildren().addAll(AreaFX.getPolylinePath(path));
+    }
+
+    public void updatePathFX (Agent<FireCellMoore2DStochastic> agent) {
+        agentPaths.get(agent).getPoints().clear();
+        agentPaths.get(agent).getPoints().addAll(
+                AreaFX.toJavaFXPathPoints(agent.getPath(), agent.getPosition()));
+    }
+
     //  get anonymous class
     private RegularNetMoore2D<FireCellMoore2DStochastic> getGrid(Area area) {
         return new RegularNetMoore2D<>(area) {
@@ -247,38 +281,6 @@ public class ControllerFX {
                 return cellLine;
             }
         };
-    }
-
-    private void scale(Parent p, Scale scale) {
-        p.getChildrenUnmodifiable().forEach(o -> o.getTransforms().add(scale));
-    }
-
-    private void drawBounds(Area area, Group group) {
-        var lines = AreaFX.areaJavaFXLines(area);
-        lines.forEach(AreaFX::paintBoundLine);
-        group.getChildren().addAll(lines);
-    }
-
-    private void drawGridInit (RegularNet2D<FireCellMoore2DStochastic> grid, Group group) {
-        Circle circle;
-        for (var cell : grid.getAdjTable().keySet()) {
-            cell.setValue(0.);
-            circle = AreaFX.toJavaFXUnitCircle(cell);
-            gridMap.put(cell, circle);
-
-            AreaFX.paintGridCell(circle);
-            group.getChildren().add(circle);
-        }
-    }
-
-    public void drawPath (List<? extends Node2D<Double,Integer>> path, Group group) {
-        group.getChildren().addAll(AreaFX.getPolylinePath(path));
-    }
-
-    public void updatePathFX (Agent<FireCellMoore2DStochastic> agent) {
-        agentPaths.get(agent).getPoints().clear();
-        agentPaths.get(agent).getPoints().addAll(
-                AreaFX.toJavaFXPathPoints(agent.getPath(), agent.getPosition()));
     }
 
 }

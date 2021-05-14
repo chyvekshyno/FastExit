@@ -5,28 +5,36 @@
       "zoneName" : "room0",
       "len" : 1.0,
       "shape" : [
-        { "type" : "l", "coord" : [10, 10]    },
-        { "type" : "l", "coord" : [15, 20]    },
-        { "type" : "l", "coord" : [20, 20]    },
-        { "type" : "l", "coord" : [20, 30]    },
-        { "type" : "l", "coord" : [40, 30]    },
-        { "type" : "l", "coord" : [40, 20]    },
-        { "type" : "e", "coord" : [40, 15], "vec" : "r" },
-        { "type" : "l", "coord" : [40, 10]    },
-        { "type" : "l", "coord" : [10, 10]    }
-      ]
-    }, {
-      "zoneName" : "room0",
+        { "type" : "l", "coord" : [ 1, 200]    },
+        { "type" : "l", "coord" : [30, 200]   },
+        { "type" : "e", "coord" : [34, 200]   },
+        { "type" : "l", "coord" : [50, 200]   },
+        { "type" : "l", "coord" : [ 1, 200]    }
+      ],
+    },{
+      "zoneName" : "room1",
       "len" : 1.0,
       "shape" : [
-        { "type" : "l", "coord" : [40,  5]    },
-        { "type" : "l", "coord" : [40, 15]    },
-        { "type" : "e", "coord" : [40, 20], "vec" : "l" },
+        { "type" : "l", "coord" : [1, 70]    },
+        { "type" : "l", "coord" : [10, 50]    },
         { "type" : "l", "coord" : [40, 40]    },
-        { "type" : "l", "coord" : [50, 40]    },
-        { "type" : "l", "coord" : [50,  5]    },
-        { "type" : "l", "coord" : [40,  5]    }
-      ]
+        { "type" : "l", "coord" : [40, 70]    },
+        { "type" : "l", "coord" : [35, 70]    },
+        { "type" : "e", "coord" : [33, 70], "vec" : "l" },
+        { "type" : "l", "coord" : [1, 70]    }
+      ],
+    },{
+      "zoneName" : "room2",
+      "len" : 1.0,
+      "shape" : [
+        { "type" : "l", "coord" : [35, 70]    },
+        { "type" : "l", "coord" : [10, 50]    },
+        { "type" : "l", "coord" : [40, 40]    },
+        { "type" : "l", "coord" : [40, 70]    },
+        { "type" : "l", "coord" : [35, 70]    },
+        { "type" : "e", "coord" : [33, 70], "vec" : "l" },
+        { "type" : "l", "coord" : [1, 70]    }
+      ],
     }
   ],
   "exits" : [
