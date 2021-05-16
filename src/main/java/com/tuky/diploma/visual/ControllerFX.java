@@ -49,6 +49,7 @@ public class ControllerFX {
     private Map<FireCellMoore2DStochastic, Shape> gridMap;
     private Map<Agent<FireCellMoore2DStochastic>, Polyline> agentPaths;
     private RegularNetMoore2D<FireCellMoore2DStochastic> grid;
+    private List<FireCellMoore2DStochastic> exits;
     private FireSpreadCAStochastic caFire;
     private ControllerFire modelController;
 
@@ -193,6 +194,7 @@ public class ControllerFX {
         try {
             Area area = AreaJSONParser.parse(path);
             grid = getGrid(area);
+            exits = grid.getExits();
             drawBounds(area, group);
             drawGridInit(grid, group);
 
@@ -225,7 +227,11 @@ public class ControllerFX {
             circle = AreaFX.toJavaFXUnitCircle(cell);
             gridMap.put(cell, circle);
 
-            AreaFX.paintGridCell(circle);
+            if (exits.contains(cell))
+                AreaFX.paintCellExit(circle);
+            else
+                AreaFX.paintGridCell(circle);
+
             group.getChildren().add(circle);
         }
     }

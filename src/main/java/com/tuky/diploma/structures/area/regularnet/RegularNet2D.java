@@ -1,10 +1,7 @@
 package com.tuky.diploma.structures.area.regularnet;
 
 import com.tuky.diploma.structures.addition.HSLS;
-import com.tuky.diploma.structures.area.Area;
-import com.tuky.diploma.structures.area.IntCoord;
-import com.tuky.diploma.structures.area.Side;
-import com.tuky.diploma.structures.area.Zone;
+import com.tuky.diploma.structures.area.*;
 import com.tuky.diploma.structures.graph.*;
 
 import java.util.*;
@@ -38,6 +35,7 @@ public abstract class RegularNet2D
     protected int MAX_X;
     protected int MAX_Y;
     protected List<List<N>> grid;
+    protected List<N> exits;
     protected final double len;
 
     //endregion
@@ -52,6 +50,7 @@ public abstract class RegularNet2D
         this(len);
         initMINS(x0, y0);
         grid = cellRectangle(x0, y0, x1, y1);
+        exits = new ArrayList<>();
     }
 
     public RegularNet2D(IntCoord coord1, IntCoord coord2, double len) {
@@ -62,6 +61,7 @@ public abstract class RegularNet2D
         this(zone.getLen());
         initMINS(zone.MIN_X(), zone.MIN_Y());
         grid = figure(zone, cellRectangle(zone));
+        exits = new ArrayList<>();
     }
 
     public RegularNet2D(Area area) {
@@ -76,10 +76,21 @@ public abstract class RegularNet2D
                 .mapToInt(Zone::MAX_Y).max().orElse(0);
 
         grid = figure(area);
-
+        exits = defineExits(area.getExits());
     }
 
     //endregion
+
+
+    public List<N> getExits() {
+        return exits;
+    }
+
+    private List<N> defineExits(List<Coord<Integer>> exitCoords) {
+        return exitCoords.stream()
+                .map(this::get)
+                .collect(Collectors.toList());
+    }
 
 
     //region    METHODS
@@ -150,6 +161,10 @@ public abstract class RegularNet2D
     }
 
     //region    THIS GRID MAP GETTERS
+    public N get(Coord<Integer> coord) {
+        return get(coord.X(), coord.Y());
+    }
+
     public N get(int x, int y) {
         return grid.get(y - MIN_Y)
                 .stream()
@@ -266,10 +281,6 @@ public abstract class RegularNet2D
 
             for (int i = 0; i < bucket.size(); i++) {
                 hsls0 = bucket.get(i++);
-//                    if (i == bucket.size()) {
-//                        cellLine.addAll(getRowAtRect(hsls0.y(), hsls1.xR() + 1, hsls0.xL() - 1, cellRect));
-//                        continue;
-//                    }
                 hsls1 = bucket.get(i);
                 cellLine.addAll(getRowAtRect(hsls0.y(), hsls0.xR() + 1, hsls1.xL() - 1, cellRect));
             }

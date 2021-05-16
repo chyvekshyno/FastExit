@@ -1,5 +1,7 @@
 package com.tuky.diploma.structures.area;
 
+import com.tuky.diploma.structures.graph.Node;
+import com.tuky.diploma.structures.graph.Node2D;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -31,21 +33,16 @@ public class AreaJSONParser {
         String areaName = (String) root.get(TAG_AREA_NAME);
 
         return new Area(parseZones((JSONArray) root.get(TAG_ZONES))
-                , parseExitsConnect((JSONArray) root.get(TAG_EXITS)), 1);
+                , parseExits((JSONArray) root.get(TAG_EXITS)), 1);
     }
 
     /**
      * Here Coord uses as Pairs of Ints
      */
-    private static List<List<Integer>> parseExitsConnect(JSONArray jsonExits) {
-        List<List<Integer>> res = new ArrayList<>();
-        for (Object it : jsonExits)
-            res.add(List.of(
-                    (int) (long) ((JSONArray) it).get(0),
-                    (int) (long) ((JSONArray) it).get(1),
-                    (int) (long) ((JSONArray) it).get(2),
-                    (int) (long) ((JSONArray) it).get(3)));
-
+    private static List<Coord<Integer>> parseExits(JSONArray jsonExits) {
+        List<Coord<Integer>> res = new ArrayList<>();
+        for (Object exit : jsonExits)
+            res.add(parseCoord((JSONArray) exit));
         return res;
     }
 
@@ -64,11 +61,11 @@ public class AreaJSONParser {
         double len = (Double) object.get(TAG_LEN);
 
         return new Zone(parseShape(polygonsJsonArr),
-                        parseExits(exitsJsonArr),
+                        parsePortals(exitsJsonArr),
                         len);
     }
 
-    private static List<Exit> parseExits(JSONArray exits) {
+    private static List<Exit> parsePortals(JSONArray exits) {
         JSONArray exitCurr;
         List<Exit> exitList = new ArrayList<>();
 

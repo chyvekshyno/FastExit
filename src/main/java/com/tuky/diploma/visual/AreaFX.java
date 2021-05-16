@@ -81,12 +81,12 @@ public class AreaFX {
 
     public static void paintExit(Line line) {
         line.setStroke(Color.WHITESMOKE);
+        line.setFill(Color.WHITESMOKE);
         line.setStrokeWidth(0.4);
     }
 
     public static void paintBoundLine(Line line) {
-//        line.setStroke(Color.BLACK);
-        line.setStroke(Color.rgb(0,0,0));
+        line.setStroke(Color.BLACK);
         line.setStrokeWidth(0.2);
     }
 
@@ -174,9 +174,9 @@ public class AreaFX {
         cell.setStrokeWidth(0.4);
     }
 
-    private static void paintCellExit(Shape cell) {
+    public static void paintCellExit(Shape cell) {
         cell.setFill(COLOR_EXIT_CELL);
         cell.setStroke(COLOR_EXIT_CELL);
-        cell.setStrokeWidth(0.5);
+        cell.setStrokeWidth(1.5);
     }
 }

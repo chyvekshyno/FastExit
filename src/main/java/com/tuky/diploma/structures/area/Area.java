@@ -5,15 +5,16 @@ import java.util.List;
 public class Area {
     private final double len;
     private final List<Zone> zones;
+    private final List<Coord<Integer>> exits;
 
-    public Area(List<Zone> zones, List<List<Integer>> connections, double len){
+    public Area(List<Zone> zones, List<Coord<Integer>> exits, double len){
         this.zones = zones;
         this.len = len;
-        connectAll(connections);
+        this.exits = exits;
     }
 
-    private void connectAll(List<List<Integer>> connections) {
-        connections.forEach(this::connect);
+    public List<Coord<Integer>> getExits() {
+        return exits;
     }
 
     private void connect(List<Integer> connection){
