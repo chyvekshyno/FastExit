@@ -33,7 +33,8 @@ public class ControllerTAARiskFire extends ControllerTAAFire{
         this.Risk = new HashMap<>();
         initRisk();
 
-        initAgentsPathfinding(fx.getAgentPaths().keySet());
+        initPathfinders(exits);
+        initAgents(fx.getAgentPaths().keySet());
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ControllerTAARiskFire extends ControllerTAAFire{
         updatePaths(changed);
         stepAgents();
         reDraw();
-        agentsPathfinding.keySet().removeIf(this::isSafe);
+        agents.keySet().removeIf(this::isSafe);
     }
 
     @Override

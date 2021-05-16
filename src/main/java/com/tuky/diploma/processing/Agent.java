@@ -29,7 +29,9 @@ public class Agent<N extends Node<?>> {
 //        path.remove(temp);
     }
 
-    public void updatePath(Pathfinding<N> pathfinding, N target) {
-        path = pathfinding.path(position, target);
+    public void updatePath(Map<N,N> newPath) {
+        if (newPath == null)
+            System.err.println("ERROR\tnewPath is NULL");
+        path = newPath;
     }
 }

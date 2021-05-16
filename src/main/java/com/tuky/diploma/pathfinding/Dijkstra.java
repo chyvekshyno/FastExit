@@ -14,6 +14,9 @@ public class Dijkstra <N extends Node<?>>
     protected Queue<N> open;
     protected Set<N> closed;
 
+    protected N source;
+    protected N target;
+
     public Dijkstra(Graph<N> graph) {
         this.graph = graph;
         initStructures();
@@ -29,9 +32,17 @@ public class Dijkstra <N extends Node<?>>
 
     public Map<N, N> path(N source, N target) {
         initData(source, target);
-        var path = algorithm(source, target);
-        clearData();
-        return path;
+        return algorithm(source, target);
+    }
+
+    @Override
+    public Map<N, N> getPath() {
+        return pathTraceback(source, target, parent);
+    }
+
+    @Override
+    public double getPathLen() {
+        return dist.get(target);
     }
 
     protected Map<N, Double> _distTree (N source) {
@@ -49,11 +60,15 @@ public class Dijkstra <N extends Node<?>>
     protected void initStructures() {
         parent  = new HashMap<>();
         dist    = new HashMap<>();
-        open    = new PriorityQueue<>(Comparator.comparing(dist::get));
+        open    = new PriorityQueue<>(openComparator());
         closed  = new HashSet<>();
     }
 
     protected void initData(N source, N target) {
+        clearData();
+        this.source = source;
+        this.target = target;
+
         parent.put(source, null);
         open.add(source);
         dist.put(source, 0.);
@@ -117,6 +132,10 @@ public class Dijkstra <N extends Node<?>>
     }
 
     protected boolean relaxCondition(N curr, N next, double weight) {
-        return  !dist.containsKey(next) || dist.get(next) > dist.get(curr) + weight;
+        return !dist.containsKey(next) || dist.get(next) > dist.get(curr) + weight;
+    }
+
+    protected Comparator<N> openComparator() {
+        return Comparator.comparing(dist::get);
     }
 }

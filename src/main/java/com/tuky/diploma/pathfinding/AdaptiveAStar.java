@@ -25,11 +25,11 @@ public class AdaptiveAStar<N extends Node2D<?, Integer>>
         N current;
         while (!open.isEmpty()) {
             current = open.poll();
-            process(current, dist, parent, open, closed);
             if (current == target) {
                 updateH(current);
                 return pathTraceback(source, current, parent);
             }
+            process(current, dist, parent, open, closed);
         }
         return null;
     }

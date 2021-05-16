@@ -8,7 +8,6 @@ import java.util.*;
 public class AStar <N extends Node2D<?, Integer>>
         extends Dijkstra<N>{
 
-    protected N target;
     protected Map<N, Double> H;
 
     public AStar(Graph<N> graph) {
@@ -30,12 +29,6 @@ public class AStar <N extends Node2D<?, Integer>>
     }
 
     @Override
-    public Map<N, N> path(N source, N target) {
-        this.target = target;
-        return super.path(source, target);
-    }
-
-    @Override
     protected void process(N curr,
                            Map<N, Double> dist,
                            Map<N, N> parent,
@@ -43,13 +36,18 @@ public class AStar <N extends Node2D<?, Integer>>
                            Set<N> closed) {
 
         for (var tr : graph.getAdjTable().get(curr)) {
-            if (tr == null)
-                continue;
+            if (tr == null) continue;
 
             initNode(tr.getEnd());
             relax(curr, tr.getEnd(), tr.getWeight(), dist, parent, open, closed);
         }
         closed.add(curr);
+    }
+
+    @Override
+    protected void initData(N source, N target) {
+        super.initData(source, target);
+        initNode(source);
     }
 
     protected void initNode(N node) {
@@ -59,15 +57,13 @@ public class AStar <N extends Node2D<?, Integer>>
 
     @Override
     protected void initStructures() {
-        parent  = new HashMap<>();
-        dist    = new HashMap<>();
-        open    = new PriorityQueue<>(openComparator());
-        closed  = new HashSet<>();
+        super.initStructures();
         H = new HashMap<>();
         graph.getAdjTable().keySet()
                 .forEach(cell -> H.put(cell, Double.NEGATIVE_INFINITY));
     }
 
+    @Override
     protected Comparator<N> openComparator() {
         return Comparator.comparing(node -> dist.get(node) + H.get(node));
     }

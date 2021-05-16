@@ -113,6 +113,7 @@ public class ControllerFX {
         agentPaths = new HashMap<>() {
             {
                 put(new Agent<>(grid.get(2, 3)), new Polyline());
+                put(new Agent<>(grid.get(2, 17)), new Polyline());
             }
         };
 
@@ -123,8 +124,9 @@ public class ControllerFX {
         }
 
         modelController = new ControllerTAARiskFire(this,
-                new ArrayList<>() {{  add(grid.get(37, 3));  }},
-                new FireSpreadCAStochastic(grid, 200), 10.0,
+                new ArrayList<>() {{  add(grid.get(37, 3));
+                                      add(grid.get(37, 19));  }},
+                new FireSpreadCAStochastic(grid, 1000), 5.,
                 200);
 
         Thread t = new Thread(() -> {

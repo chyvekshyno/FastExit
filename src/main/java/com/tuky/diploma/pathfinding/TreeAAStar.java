@@ -9,7 +9,6 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         extends AdaptiveAStar<N>{
 
     protected int counter;
-    protected N source;
     protected Map<N, Integer> generated;
     protected Map<N, Integer> Id;
     protected Map<N, N> pathTree;
@@ -17,13 +16,6 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     protected Map<Integer, Double> H_max;
     protected Map<Integer, Double> H_min;
 
-
-    public Set<N> getClosed() {
-        return closed;
-    }
-    public int getCounter() {
-        return counter;
-    }
 
     public Map<N, Integer> getId() {
         return Id;
@@ -33,31 +25,40 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         return pathTree;
     }
 
-    public Map<Integer, List<Integer>> getPaths() {
-        return paths;
-    }
-
     public Map<Integer, Double> getH_max() {
         return H_max;
-    }
-
-    public Map<Integer, Double> getH_min() {
-        return H_min;
     }
 
     public TreeAAStar(Graph<N> graph) {
         super(graph);
     }
 
+    @Override
+    public double getPathLen() {
+        double len = 0.;
+        N curr = pathTree.get(source);
+        while (curr != target){
+            N next = pathTree.get(curr);
+            len += graph.getAdjTable().get(curr).stream()
+                    .filter(Objects::nonNull)
+                    .filter(tr -> tr.getEnd()==next)
+                    .findFirst().orElseThrow().getWeight();
+            curr = next;
+        }
+        return len;
+//        return super.getPathLen();
+    }
+
+    @Override
+    public Map<N, N> getPath() {
+        return pathTree;
+    }
 
     @Override
     protected void initNode(N node) {
-        if (generated.get(node) == 0) {
-            dist.put(node, Double.POSITIVE_INFINITY);
+        if (generated.get(node) == 0)
             H.put(node, potential(node, target));
-        } else if (generated.get(node) != counter) {
-            dist.put(node, Double.POSITIVE_INFINITY);
-        }
+
         generated.put(node, counter);
     }
 
@@ -80,72 +81,26 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     @Override
     protected void initData(N source, N target) {
         counter++;
-        this.source = source;
-        initNode(source);
-        dist.put(source, 0.);
-        open.add(source);
+        super.initData(source,target);
         pathTree.put(target, null);
-    }
-
-    @Override
-    protected void clearData() {
-        dist = new HashMap<>();
-        closed.clear();
-        open = new PriorityQueue<>(openComparator());
-        parent.clear();
     }
 
     @Override
     protected Map<N, N> algorithm(N source, N target) {
         N current;
-        int i = 1;
         while (!open.isEmpty()) {
             current = open.poll();
-            if (current == target) {
-                System.out.println("\n--------To TARGET--------");
-                System.out.println("counter:\t" + getCounter());
-                System.out.println("coords =\t" + current.getCoord().X() + "," + current.getCoord().Y());
-                System.out.println("iterations:\t" + i);
-                updateH(current);
-                addPath(current);
-                return pathTree;
-            }
-            if (H.get(current) <= H_max.get(Id.get(current))) {
-                System.out.println("\n--------To TREE--------");
-                System.out.println("counter:\t" + getCounter());
-                System.out.print("coords =\t" + current.getCoord().X() + "_" + current.getCoord().Y());
-                N tmp = pathTree.get(current);
-                for (int j = 0; j < 10; j++){
-                    if (tmp == null) {
-                        System.out.print(" -> null");
-                        break;
-                    }
-                    System.out.print(" -> " + tmp.getCoord().X() + "_" + tmp.getCoord().Y());
-                    if (tmp == target) {
-                        System.out.print(" -> " + tmp.getCoord().X() + "_" + tmp.getCoord().Y() + " = target");
-                        break;
-                    }
-                    tmp = pathTree.get(tmp);
-                }
-                System.out.println("");
-                System.out.println("iterations:\t" + i);
-                System.out.println("H_current:\t" + H.get(current));
-                System.out.println("Id_current:\t" + Id.get(current));
-                System.out.println("H_max_current:\t" + H_max.get(Id.get(current)));
+            if (current == target || H.get(current) <= H_max.get(Id.get(current))) {
                 updateH(current);
                 addPath(current);
                 return pathTree;
             }
             process(current, dist, parent, open, closed);
-            i++;
         }
         return null;
     }
 
     private void addPath(N curr) {
-//        System.out.println("--------------Add-----------------");
-//        System.out.println("coords =\t" + curr.getCoord().X() + "," + curr.getCoord().Y());
-
         if (curr != target)
             paths.get(Id.get(curr)).add(counter);
 
@@ -163,7 +118,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
     }
 
     public void removePath(N curr) {
-        if (pathTree.get(curr) == null)    //  remove's target
+        if (pathTree.get(curr) == null)    //  removing target
             return;
 
         int pathCurr = Id.get(curr);
