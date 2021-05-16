@@ -22,17 +22,14 @@ public class Zone {
         this.exits = null;
     }
 
-    public Zone(List<Side> sides, double len) {
+    public Zone(List<Side> sides, List<Exit> exits, double len) {
         this.len = len;
+        this.exits = exits;
         setShape(sides);
     }
 
     public void setShape(List<Side> sides) {
         this.sides = sides;
-        this.exits = sides.stream()
-                .filter(o -> o instanceof Exit)
-                .map(o -> (Exit) o)
-                .collect(Collectors.toList());
         update();
     }
 

@@ -4,7 +4,6 @@ import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
 import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.processing.ControllerFire;
-import com.tuky.diploma.processing.ControllerTAAFire;
 import com.tuky.diploma.processing.ControllerTAARiskFire;
 import com.tuky.diploma.structures.area.Area;
 import com.tuky.diploma.structures.area.AreaJSONParser;
@@ -44,7 +43,8 @@ public class ControllerFX {
     @FXML   private Pane pane_draw;
     @FXML   private VBox vbox_controller;
 
-    public static final String PATH_AREA = "res\\area_json\\area_simple_rectangle.json";
+    public static final String PATH_AREA_RECT = "res\\area_json\\area_simple_rectangle.json";
+    public static final String PATH_AREA_FORUMLVIV = "res\\area_json\\area_forum_lviv.json";
 
     private Map<FireCellMoore2DStochastic, Shape> gridMap;
     private Map<Agent<FireCellMoore2DStochastic>, Polyline> agentPaths;
@@ -69,7 +69,7 @@ public class ControllerFX {
 
     @FXML
     public void initialize() {
-        sc = new Scale(25, 25);
+        sc = new Scale(5, 5);
         clickedInit();
         group.getChildren().forEach(
                 o -> o.setOnMouseClicked(mouseEvent -> {
@@ -99,7 +99,7 @@ public class ControllerFX {
 
     @FXML
     public void clickedInit() {
-        initGridMap(PATH_AREA);
+        initGridMap(PATH_AREA_FORUMLVIV);
         btn_start.setDisable(false);
         btn_resume.setDisable(true);
         btn_pause.setDisable(true);
@@ -112,8 +112,8 @@ public class ControllerFX {
         btn_pause.setDisable(false);
         agentPaths = new HashMap<>() {
             {
-                put(new Agent<>(grid.get(2, 3)), new Polyline());
-                put(new Agent<>(grid.get(2, 17)), new Polyline());
+                put(new Agent<>(grid.get(243, 65)), new Polyline());
+//                put(new Agent<>(grid.get(2, 17)), new Polyline());
             }
         };
 
@@ -124,8 +124,7 @@ public class ControllerFX {
         }
 
         modelController = new ControllerTAARiskFire(this,
-                new ArrayList<>() {{  add(grid.get(37, 3));
-                                      add(grid.get(37, 19));  }},
+                new ArrayList<>() {{  add(grid.get(2, 75));  }},
                 new FireSpreadCAStochastic(grid, 1000), 5.,
                 200);
 
@@ -209,9 +208,14 @@ public class ControllerFX {
     }
 
     private void drawBounds(Area area, Group group) {
-        var lines = AreaFX.areaJavaFXLines(area);
+        var lines = AreaFX.areaShapeJFX(area);
         lines.forEach(AreaFX::paintBoundLine);
+
+        var exits = AreaFX.areaExitsJFX(area);
+        exits.forEach(AreaFX::paintExit);
+
         group.getChildren().addAll(lines);
+        group.getChildren().addAll(exits);
     }
 
     private void drawGridInit (RegularNet2D<FireCellMoore2DStochastic> grid, Group group) {

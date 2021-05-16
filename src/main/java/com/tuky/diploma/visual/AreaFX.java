@@ -1,6 +1,5 @@
 package com.tuky.diploma.visual;
 
-import com.tuky.diploma.camodels.FireCellMoore2DHeat;
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.structures.area.*;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
@@ -42,16 +41,31 @@ public class AreaFX {
         return new Rectangle(cell.getCoord().X(), cell.getCoord().Y(), 1, 1);
     }
 
-    public static List<Line> areaJavaFXLines(Area area) {
+    public static List<Line> areaExitsJFX(Area area) {
         return area.getZones().stream()
-                .map(AreaFX::zoneJavaFXLines)
+                .map(AreaFX::zoneExitsJFX)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
-    public static List<Line> zoneJavaFXLines(Zone zone) {
+    public static List<Line> zoneExitsJFX(Zone zone) {
+        return zone.getExits().stream()
+                .map(exit -> new Line(exit.getCoord1().X(),
+                                      exit.getCoord1().Y(),
+                                      exit.getCoord2().X(),
+                                      exit.getCoord2().Y()))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Line> areaShapeJFX(Area area) {
+        return area.getZones().stream()
+                .map(AreaFX::zoneShapeJFX)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    public static List<Line> zoneShapeJFX(Zone zone) {
         return zone.getShape().stream()
-                .filter(side -> !(side instanceof Exit))
                 .map(side  ->  new Line(side.getCoord1().X(),
                                         side.getCoord1().Y(),
                                         side.getCoord2().X(),
@@ -65,9 +79,15 @@ public class AreaFX {
         cell.setStrokeWidth(0.1);
     }
 
+    public static void paintExit(Line line) {
+        line.setStroke(Color.WHITESMOKE);
+        line.setStrokeWidth(0.4);
+    }
+
     public static void paintBoundLine(Line line) {
-        line.setStroke(Color.BLACK);
-        line.setStrokeWidth(0.1);
+//        line.setStroke(Color.BLACK);
+        line.setStroke(Color.rgb(0,0,0));
+        line.setStrokeWidth(0.2);
     }
 
     public static void paintPath(Polyline path) {

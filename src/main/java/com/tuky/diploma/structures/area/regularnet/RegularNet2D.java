@@ -261,11 +261,15 @@ public abstract class RegularNet2D
 
         List<List<N>> cellMap = new ArrayList<>();
         List<N> cellLine = new ArrayList<>();
-        HSLS hsls0, hsls1;
+        HSLS hsls0, hsls1 = null;
         for (List<HSLS> bucket : ET) {
 
             for (int i = 0; i < bucket.size(); i++) {
                 hsls0 = bucket.get(i++);
+//                    if (i == bucket.size()) {
+//                        cellLine.addAll(getRowAtRect(hsls0.y(), hsls1.xR() + 1, hsls0.xL() - 1, cellRect));
+//                        continue;
+//                    }
                 hsls1 = bucket.get(i);
                 cellLine.addAll(getRowAtRect(hsls0.y(), hsls0.xR() + 1, hsls1.xL() - 1, cellRect));
             }
