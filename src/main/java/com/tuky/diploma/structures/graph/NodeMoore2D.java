@@ -28,4 +28,15 @@ public class NodeMoore2D
             , T extends Number> NodeMoore2D<V, T> at (T x, T y) {
         return new NodeMoore2D<>(Coord.at(x, y));
     }
+
+    @Override
+    public int vecLeft(int vec) {
+        return 0;
+    }
+
+    @Override
+    public int vecRight(int vec) {
+        return 0;
+    }
+
 }

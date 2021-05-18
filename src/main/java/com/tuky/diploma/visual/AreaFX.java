@@ -1,21 +1,19 @@
 package com.tuky.diploma.visual;
 
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
+import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.structures.area.*;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 import com.tuky.diploma.structures.graph.Node2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AreaFX {
 
-    public static Color COLOR_FIRE_CELL = Color.ORANGE;
+    public static Color COLOR_FIRE_CELL = Color.RED;
     public static Color COLOR_FUEL_CELL = Color.DARKGRAY;
     public static Color COLOR_BURNED_CELL = Color.BROWN;
     public static Color COLOR_NONFUEL_CELL = Color.DIMGRAY;
@@ -32,13 +30,19 @@ public class AreaFX {
         return points;
     }
 
+    public static <N extends Node2D<?, Integer>> Map<Agent<N>, Polyline> initAgentsPath(List<Agent<N>> agents){
+        Map<Agent<N>, Polyline> map = new HashMap<>();
+        agents.forEach(agent -> map.put(agent, new Polyline()));
+        return map;
+    }
+
     public static Circle toJavaFXUnitCircle(Node2D<Double, Integer> cell){
-        return new Circle(cell.getCoord().X(), cell.getCoord().Y(), 0.1);
+        return new Circle(cell.getCoord().X(), cell.getCoord().Y(), 0.2);
 
     }
 
     public static Rectangle toJavaFXUnitSquare(NodeMoore2D<Double, Integer> cell) {
-        return new Rectangle(cell.getCoord().X(), cell.getCoord().Y(), 1, 1);
+        return new Rectangle(cell.getCoord().X()-0.5, cell.getCoord().Y()-0.5, 0.8, 0.8);
     }
 
     public static List<Line> areaExitsJFX(Area area) {
@@ -76,7 +80,7 @@ public class AreaFX {
     public static void paintGridCell(Shape cell) {
         cell.setFill(Color.DARKGRAY);
         cell.setStroke(Color.DARKGRAY);
-        cell.setStrokeWidth(0.1);
+        cell.setStrokeWidth(0.01);
     }
 
     public static void paintExit(Line line) {
@@ -91,7 +95,7 @@ public class AreaFX {
     }
 
     public static void paintPath(Polyline path) {
-        path.setStroke(Color.GREEN);
+        path.setStroke(Color.BLUE);
         path.setStrokeWidth(0.15);
         path.setFill(Color.TRANSPARENT);
     }
@@ -125,7 +129,7 @@ public class AreaFX {
         return polyline;
     }
 
-    public static void updateGrid (Map<FireCellMoore2DStochastic, Shape> gridMap,
+    public static void updateGrid (Map<FireCellMoore2DStochastic, Rectangle> gridMap,
                                    List<FireCellMoore2DStochastic> agents,
                                    List<FireCellMoore2DStochastic> exits) {
         for (var entry : gridMap.entrySet()) {
@@ -144,39 +148,59 @@ public class AreaFX {
         }
     }
 
-    private static void paintCellFUEL(Shape cell) {
-        cell.setFill(COLOR_FUEL_CELL);
+    private static void paintCellCovered(Rectangle cell) {
+        cell.setArcHeight(0);
+        cell.setArcWidth(0);
+        cell.setFill(Color.rgb(255,0,0,0.2));
+        cell.setStroke(Color.rgb(255,0,0,0.2));
+        cell.setStrokeWidth(0.1);
+    }
+
+    private static void paintCellFUEL(Rectangle cell) {
+        cell.setArcHeight(0);
+        cell.setArcWidth(0);
+        cell.setFill(Color.WHITESMOKE);
         cell.setStroke(COLOR_FUEL_CELL);
         cell.setStrokeWidth(0.1);
     }
 
-    private static void paintCellNonFUEL(Shape cell) {
-        cell.setFill(COLOR_NONFUEL_CELL);
+    private static void paintCellNonFUEL(Rectangle cell) {
+        cell.setArcHeight(0);
+        cell.setArcWidth(0);
+        cell.setFill(Color.WHITESMOKE);
         cell.setStroke(COLOR_NONFUEL_CELL);
         cell.setStrokeWidth(0.1);
     }
 
-    private static void paintCellBURNED(Shape cell) {
+    private static void paintCellBURNED(Rectangle cell) {
+        cell.setArcHeight(0);
+        cell.setArcWidth(0);
         cell.setFill(COLOR_BURNED_CELL);
         cell.setStroke(COLOR_BURNED_CELL);
-        cell.setStrokeWidth(0.5);
+        cell.setStrokeWidth(0.2);
     }
 
-    private static void paintCellFIRE(Shape cell) {
+    private static void paintCellFIRE(Rectangle cell) {
+        cell.setArcHeight(0);
+        cell.setArcWidth(0);
         cell.setFill(COLOR_FIRE_CELL);
         cell.setStroke(COLOR_FIRE_CELL);
-        cell.setStrokeWidth(0.5);
+        cell.setStrokeWidth(0.2);
     }
 
-    public static void paintCellAgent(Shape cell) {
+    public static void paintCellAgent(Rectangle cell) {
+        cell.setArcHeight(1);
+        cell.setArcWidth(1);
         cell.setFill(COLOR_AGENT_CELL);
         cell.setStroke(COLOR_AGENT_CELL);
-        cell.setStrokeWidth(0.4);
+        cell.setStrokeWidth(0.2);
     }
 
-    public static void paintCellExit(Shape cell) {
+    public static void paintCellExit(Rectangle cell) {
+        cell.setArcHeight(0.2);
+        cell.setArcWidth(0.2);
         cell.setFill(COLOR_EXIT_CELL);
         cell.setStroke(COLOR_EXIT_CELL);
-        cell.setStrokeWidth(1.5);
+        cell.setStrokeWidth(0.2);
     }
 }

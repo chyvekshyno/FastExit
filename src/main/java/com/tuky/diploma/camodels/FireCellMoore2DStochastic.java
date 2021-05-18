@@ -31,11 +31,11 @@ public class FireCellMoore2DStochastic
         },
         BURNED {
             @Override
-            public double damage() {  return 10;  }
+            public double damage() {  return 5;  }
         },
         FIRE {
             @Override
-            public double damage() {  return 100;  }
+            public double damage() {  return 10;  }
         };
 
         abstract public double damage();
@@ -45,7 +45,7 @@ public class FireCellMoore2DStochastic
         return state;
     }
     public FireCellMoore2DStochastic(Coord<Integer> coord) {
-        this(coord, 0.2, 100000, FireCellState.FUEL);
+        this(coord, 0.5, 100000, FireCellState.FUEL);
     }
 
     public FireCellMoore2DStochastic(Coord<Integer> coord, double koef_ignite, double burnTime, FireCellState state) {
@@ -102,6 +102,6 @@ public class FireCellMoore2DStochastic
     }
 
     public static FireCellMoore2DStochastic at (int x, int y) {
-        return FireCellMoore2DStochastic.at(Coord.at(x, y), 0.2, 100000, FireCellState.FUEL);
+        return FireCellMoore2DStochastic.at(Coord.at(x, y), 0.5, 100000, FireCellState.FUEL);
     }
 }

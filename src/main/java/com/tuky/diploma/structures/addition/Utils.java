@@ -1,11 +1,27 @@
 package com.tuky.diploma.structures.addition;
 
+import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.structures.graph.Graph;
 import com.tuky.diploma.structures.graph.Node2D;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Utils{
+
+    public static int flipCoin(){
+        Random rand = new Random();
+        return rand.nextInt(2);
+    }
+
+    public static <N extends Node2D<?, Integer>> List<Agent<N>> randomAgents(List<N> nodes, int number) {
+        return new Random().ints(0, nodes.size())
+                            .distinct()
+                            .limit(number)
+                            .mapToObj(i -> new Agent<>(nodes.get(i)) )
+                            .collect(Collectors.toList());
+    }
 
     public static <N extends Node2D<?, Integer> & Risk> double risk(N node, Map<N, List<N>> covered, double radius) {
         double risk = 0.;

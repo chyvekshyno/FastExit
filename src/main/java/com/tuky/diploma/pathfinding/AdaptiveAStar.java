@@ -17,7 +17,7 @@ public class AdaptiveAStar<N extends Node2D<?, Integer>>
     }
 
     protected void updateH(N curr) {
-        closed.forEach(node -> H.put(node, dist.get(curr) + H.get(curr) - dist.get(node)));
+        closed.forEach(node -> H.replace(node, dist.get(curr) + H.get(curr) - dist.get(node)));
     }
 
     @Override

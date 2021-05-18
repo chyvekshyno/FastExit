@@ -14,8 +14,12 @@ public interface Moore2D {
     int VEC_BOTTOM         = 6;
     int VEC_BOTTOM_RIGHT   = 7;
 
+
     static int vecReverse(int vec) {
         return NEIGHBOURS_COUNT - vec - 1;
     }
 
+    int vecLeft(int vec);
+
+    int vecRight(int vec);
 }
