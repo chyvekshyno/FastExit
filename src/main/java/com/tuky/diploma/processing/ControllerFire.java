@@ -7,6 +7,7 @@ import com.tuky.diploma.structures.area.regularnet.RegularNetMoore2D;
 import com.tuky.diploma.structures.graph.*;
 import com.tuky.diploma.visual.AreaFX;
 import com.tuky.diploma.visual.ControllerFX;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public class ControllerFire{
     protected final FireSpreadCAStochastic CA;
     protected final ControllerFX fx;
 
-    protected final Map<FireCellMoore2DStochastic, Shape> gridFX;
+    protected final Map<FireCellMoore2DStochastic, Rectangle> gridFX;
 
     protected int ts;
     protected final AtomicBoolean processing;
@@ -135,7 +136,6 @@ public class ControllerFire{
                     .map(exit -> updatePath(agent, exit))
                     .collect(Collectors.toList());
 
-            System.out.println("threads:\t"+update.size());
             try {
                 for (Thread thread : update)
                     thread.join();
@@ -184,7 +184,6 @@ public class ControllerFire{
 
         agents.replace(agent, bestPF);
         agent.updatePath(bestPF.getPath());
-        System.out.println("Success");
     }
 
     protected boolean isSafe(Agent<FireCellMoore2DStochastic> agent) {

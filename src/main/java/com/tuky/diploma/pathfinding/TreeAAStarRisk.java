@@ -28,7 +28,12 @@ public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
 
     @Override
     protected void updateH(N curr) {
-        closed.forEach(node -> H.put(node, dist.get(curr) + distW * H.get(curr) - dist.get(node) + riskW * R.get(curr)));
+        closed.forEach(node -> {
+            H.put(node, dist.get(curr) + distW * H.get(curr) - dist.get(node) + riskW * R.get(node));
+//            if (H.get(node) < 0.)
+//                System.out.println("H_new:\t"+H.get(node));
+
+        });
     }
 
     @Override
