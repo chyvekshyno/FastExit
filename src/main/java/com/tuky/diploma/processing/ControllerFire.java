@@ -7,6 +7,9 @@ import com.tuky.diploma.structures.area.regularnet.RegularNetMoore2D;
 import com.tuky.diploma.structures.graph.*;
 import com.tuky.diploma.visual.AreaFX;
 import com.tuky.diploma.visual.ControllerFX;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
+
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +27,7 @@ public class ControllerFire{
     protected final FireSpreadCAStochastic CA;
     protected final ControllerFX fx;
 
+    protected final Map<FireCellMoore2DStochastic, Rectangle> gridFX;
     protected int ts;
     protected final AtomicBoolean processing;
     //endregion
@@ -150,7 +154,13 @@ public class ControllerFire{
             e.printStackTrace();
         }
 
-        pathfinders.keySet().forEach(this::choosePath);
+            try {
+                for (Thread thread : update)
+                    thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 
 //        for (var agent : agentPF.keySet()) {
 //            List<Thread> update = pathfinders.keySet().stream()

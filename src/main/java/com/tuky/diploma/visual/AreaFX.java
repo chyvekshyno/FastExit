@@ -5,8 +5,17 @@ import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.structures.area.*;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 import com.tuky.diploma.structures.graph.Node2D;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.ZoomEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.util.Duration;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,9 +64,9 @@ public class AreaFX {
     public static List<Line> zoneExitsJFX(Zone zone) {
         return zone.getExits().stream()
                 .map(exit -> new Line(exit.getCoord1().X(),
-                                      exit.getCoord1().Y(),
-                                      exit.getCoord2().X(),
-                                      exit.getCoord2().Y()))
+                        exit.getCoord1().Y(),
+                        exit.getCoord2().X(),
+                        exit.getCoord2().Y()))
                 .collect(Collectors.toList());
     }
 
@@ -71,9 +80,9 @@ public class AreaFX {
     public static List<Line> zoneShapeJFX(Zone zone) {
         return zone.getShape().stream()
                 .map(side  ->  new Line(side.getCoord1().X(),
-                                        side.getCoord1().Y(),
-                                        side.getCoord2().X(),
-                                        side.getCoord2().Y()))
+                        side.getCoord1().Y(),
+                        side.getCoord2().X(),
+                        side.getCoord2().Y()))
                 .collect(Collectors.toList());
     }
 

@@ -24,7 +24,7 @@ public class AreaJSONParser {
     public static final String TAG_EXITS        = "exits";
     public static final String TAG_COORD        = "coord";
 
-//    public static final String TAG_ = "";
+    //    public static final String TAG_ = "";
     public static Area parse (String jsonfile) throws IOException, ParseException {
 
         JSONObject root = (JSONObject) new JSONParser()
@@ -61,8 +61,8 @@ public class AreaJSONParser {
         double len = (Double) object.get(TAG_LEN);
 
         return new Zone(parseShape(polygonsJsonArr),
-                        parsePortals(exitsJsonArr),
-                        len);
+                parsePortals(exitsJsonArr),
+                len);
     }
 
     private static List<Exit> parsePortals(JSONArray exits) {
@@ -72,7 +72,7 @@ public class AreaJSONParser {
         for (Object exit : exits) {
             exitCurr = (JSONArray) exit;
             exitList.add(parseExit( (JSONArray) exitCurr.get(0),
-                                    (JSONArray) exitCurr.get(1)));
+                    (JSONArray) exitCurr.get(1)));
         }
         return exitList;
     }

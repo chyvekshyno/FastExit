@@ -5,28 +5,32 @@
       "zoneName" : "room0",
       "len" : 1.0,
       "shape" : [
-        { "type" : "l", "coord" : [50, 10]   },
-        { "type" : "l", "coord" : [250, 10]   },
-        { "type" : "l", "coord" : [250, 110]   },
-        { "type" : "e", "coord" : [250, 130]   },
-        { "type" : "l", "coord" : [200, 150]   },
-        { "type" : "l", "coord" : [50, 150]   },
-        { "type" : "l", "coord" : [50, 10]   },
+        { "type" : "l", "coord" : [10, 10]   },
+        { "type" : "l", "coord" : [20, 10]   },
+        { "type" : "l", "coord" : [30, 20]   },
+        { "type" : "e", "coord" : [30, 30]   },
+        { "type" : "e", "coord" : [10, 30]   },
+        { "type" : "e", "coord" : [10, 10]   }
+      ],
+      "portals" : [
+        [[30, 22],[30,28]]
       ]
     }, {
       "zoneName" : "room1",
       "len" : 1.0,
       "shape" : [
-        { "type" : "e", "coord" : [250, 110]   },
-        { "type" : "e", "coord" : [250, 130]   },
-        { "type" : "l", "coord" : [500, 130]   },
-        { "type" : "l", "coord" : [500, 250]   },
-        { "type" : "l", "coord" : [650, 250]   },
-        { "type" : "l", "coord" : [650, 110]   },
-        { "type" : "l", "coord" : [250, 110]   }
+        { "type" : "e", "coord" : [20, 10]   },
+        { "type" : "e", "coord" : [30, 20]   },
+        { "type" : "e", "coord" : [30, 30]   },
+        { "type" : "l", "coord" : [50, 30]   },
+        { "type" : "l", "coord" : [50, 10]   },
+        { "type" : "l", "coord" : [20, 10]   }
+      ],
+      "portals" : [
+        [[30, 22],[30,28]]
       ]
-    } ],
+    }],
   "exits" : [
-    [0, 0, 0, 0]
+    [25, 11]
   ]
 }

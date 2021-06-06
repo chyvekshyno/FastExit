@@ -26,18 +26,14 @@ public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
         this.R = riskMap;
     }
 
+    @Override
+    protected void updateH(N curr) {
+        closed.forEach(node -> {
+            H.put(node, dist.get(curr) + distW * H.get(curr) - dist.get(node) + riskW * R.get(node));
+//            if (H.get(node) < 0.)
+//                System.out.println("H_new:\t"+H.get(node));
 
-    /**
-     * @return sum of risks of the last founded path
-     */
-    public double getPathRisk(){
-        double risk = 0.;
-        N curr = pathTree.get(source);
-        while (curr != target){
-            risk += R.get(curr);
-            curr = pathTree.get(curr);
-        }
-        return risk;
+        });
     }
 
 //    @Override

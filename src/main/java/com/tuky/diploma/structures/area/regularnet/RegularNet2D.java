@@ -153,8 +153,8 @@ public abstract class RegularNet2D
         return len;
     }
 
-    private int getIndX(int x) { return x - MIN_X; }
-    private int getIndY(int y) { return y - MIN_Y; }
+    protected int getIndX(int x) { return x - MIN_X; }
+    protected int getIndY(int y) { return y - MIN_Y; }
     private void initMINS(int x, int y) {
         MIN_X = x;
         MIN_Y = y;
@@ -226,10 +226,10 @@ public abstract class RegularNet2D
     protected abstract List<N> cellLineFirst(int y, int x0, int x1, List<List<N>> map);
     protected abstract List<N> cellLine(int y, int x0, int x1, List<List<N>> map);
 
-    private List<List<N>> cellRectangle(IntCoord coord1, IntCoord coord2) {
+    protected List<List<N>> cellRectangle(IntCoord coord1, IntCoord coord2) {
         return cellRectangle(coord1.X(), coord1.Y(), coord2.X(), coord2.Y());
     }
-    private List<List<N>> cellRectangle(Zone zone) {
+    protected List<List<N>> cellRectangle(Zone zone) {
         return cellRectangle(zone.MIN_X(), zone.MIN_Y(), zone.MAX_X(), zone.MAX_Y());
     }
     //endregion
@@ -264,19 +264,16 @@ public abstract class RegularNet2D
             cellLine.clear();
         }
 
-
-
         return cellMap;
-
     }
 
-    private List<List<N>> figure(Zone zone, List<List<N>> cellRect) {
+    protected List<List<N>> figure(Zone zone, List<List<N>> cellRect) {
         var ET = EdgeTable(zone);
         var ExitHSLS = toHPolygon(zone.getExits());
 
         List<List<N>> cellMap = new ArrayList<>();
         List<N> cellLine = new ArrayList<>();
-        HSLS hsls0, hsls1 = null;
+        HSLS hsls0, hsls1;
         for (List<HSLS> bucket : ET) {
 
             for (int i = 0; i < bucket.size(); i++) {
@@ -296,15 +293,14 @@ public abstract class RegularNet2D
             cellMap.get(getIndY(hsls.y()))
                     .addAll(getRowAtRect(hsls.y(), hsls.xL(), hsls.xR(), cellRect));
 
-
         return cellMap;
     }
 
-    private List<List<HSLS>> EdgeTable (Zone zone) {
+    protected List<List<HSLS>> EdgeTable (Zone zone) {
         return EdgeTable(toHPolygon(zone.getShape()), MAX_Y - MIN_Y + 1);
     }
 
-    private List<List<HSLS>> EdgeTable (List<HSLS> HPolygon, int height) {
+    protected List<List<HSLS>> EdgeTable (List<HSLS> HPolygon, int height) {
         List<List<HSLS>> ET = new ArrayList<>(height);
         for (int k = 0; k < height; k++)
             ET.add(new ArrayList<>());
@@ -354,7 +350,7 @@ public abstract class RegularNet2D
         ET.get(getIndY(curr.y())).add(curr);
     }
 
-    private List<HSLS> toHPolygon(List<? extends Side> zoneShape) {
+    protected List<HSLS> toHPolygon(List<? extends Side> zoneShape) {
         return zoneShape.stream()
                 .flatMap(side -> toHLine(side.getCoord1(), side.getCoord2()).stream())
                 .collect(Collectors.toList());
@@ -367,35 +363,35 @@ public abstract class RegularNet2D
         int y1 = coord2.Y();
 
         if (y0 == y1) {
-            if      (x0 < x1)   return new ArrayList<>() {{  add(new HSLS(y0, x0, x1));  }};
-            else                return new ArrayList<>() {{  add(new HSLS(y0, x1, x0));  }};
+            if      (x0 < x1)   return new ArrayList<>() {{  add(new HSLS(y0, x0, x1, 0));  }};
+            else                return new ArrayList<>() {{  add(new HSLS(y0, x1, x0, 0));  }};
         }
 
         if (y0 < y1) {
             if      (x0 < x1) {
-                if  (x1-x0 > y1-y0)     return toHLineLow (x0, y0, x1, y1, +1, false);
-                else                    return toHLineHigh(x0, y0, x1, y1, +1, false);
+                if  (x1-x0 > y1-y0)     return toHLineLow (x0, y0, x1, y1, +1, false, 1);
+                else                    return toHLineHigh(x0, y0, x1, y1, +1, false, 1);
             }
             else if (x0 > x1) {
-                if (x0-x1 > y1-y0)      return toHLineLow (x1, y1, x0, y0, -1, true);
-                else                    return toHLineHigh(x0, y0, x1, y1, -1, false);
+                if (x0-x1 > y1-y0)      return toHLineLow (x1, y1, x0, y0, -1, true , -1);
+                else                    return toHLineHigh(x0, y0, x1, y1, -1, false, -1);
             }
             else                        return new ArrayList<>() {{
                                             for (int y = y0; y < y1; y++)
-                                                add(new HSLS(y, x0, x1));
+                                                add(new HSLS(y, x0, x1, 0));
                                         }};
         } else {
             if      (x0 < x1) {
-                if  (x1-x0 > y0-y1)     return toHLineLow (x0, y0, x1, y1, -1, false);
-                else                    return toHLineHigh(x1, y1, x0, y0, -1, true);
+                if  (x1-x0 > y0-y1)     return toHLineLow (x0, y0, x1, y1, -1, false, -1);
+                else                    return toHLineHigh(x1, y1, x0, y0, -1, true , -1);
             }
             else if (x0 > x1) {
-                if (x0-x1 > y1-y0)      return toHLineLow (x1, y1, x0, y0, +1, true);
-                else                    return toHLineHigh(x1, y1, x0, y0, +1, true);
+                if (x0-x1 > y1-y0)      return toHLineLow (x1, y1, x0, y0, +1, true, 1);
+                else                    return toHLineHigh(x1, y1, x0, y0, +1, true, 1);
             }
             else                        return new ArrayList<>() {{
                                             for (int y = y0; y > y1; y--)
-                                                add(new HSLS(y, x0, x1));
+                                                add(new HSLS(y, x0, x1, 0));
                                         }};
         }
     }
@@ -403,7 +399,8 @@ public abstract class RegularNet2D
     /**
      * uses Bresenham algorithm
      */
-    private List<HSLS> toHLineLow(int x0, int y0, int x1, int y1, int y_step, boolean rev) {
+    private List<HSLS> toHLineLow(int x0, int y0, int x1, int y1,
+                                  int y_step, boolean rev, int hslsFlag) {
         int _2dy = y1 - y0;
         int _2dx = x1 - x0;
         int errD = 2 * _2dy * y_step;
@@ -417,7 +414,7 @@ public abstract class RegularNet2D
             flag = false;
             if (err >= 0){
                 err -= 2 * _2dx;
-                HSLSArr.add(new HSLS(y, xL, xR));
+                HSLSArr.add(new HSLS(y, xL, xR, hslsFlag));
                 y += y_step;
                 xL = xR + 1;
                 flag = true;
@@ -425,7 +422,7 @@ public abstract class RegularNet2D
             err += errD;
         }
         if (!flag)
-            HSLSArr.add(new HSLS(y, xL, x1));
+            HSLSArr.add(new HSLS(y, xL, x1, hslsFlag));
 
         if (rev)
             Collections.reverse(HSLSArr);
@@ -434,9 +431,10 @@ public abstract class RegularNet2D
     }
 
     /**
-     * uses Bresenham algorithm swapped coord dims
+     * uses Bresenham algorithm
      */
-    private List<HSLS> toHLineHigh(int x0, int y0, int x1, int y1, int x_step, boolean rev) {
+    private List<HSLS> toHLineHigh(int x0, int y0, int x1, int y1,
+                                   int x_step, boolean rev, int hslsFlag) {
         int _2dy = y1 - y0;
         int _2dx = x1 - x0;
         int errD = 2 * _2dx * x_step;
@@ -445,7 +443,7 @@ public abstract class RegularNet2D
         List<HSLS> HSLSArr = new ArrayList<>();
         int x = x0;
         for (int y = y0; y < y1 + 1; y++) {
-            HSLSArr.add(new HSLS(y, x, x));
+            HSLSArr.add(new HSLS(y, x, x, hslsFlag));
             if (err >= 0){
                 err -= 2 * _2dy;
                 x += x_step;

@@ -13,12 +13,14 @@ import com.tuky.diploma.structures.area.regularnet.RegularNet2D;
 import com.tuky.diploma.structures.area.regularnet.RegularNetMoore2D;
 import com.tuky.diploma.structures.graph.Node2D;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -48,6 +50,7 @@ public class ControllerFX {
     @FXML   private VBox vbox_controller;
 
     public static final String PATH_AREA_RECT = "res\\area_json\\area_simple_rectangle.json";
+    public static final String PATH_AREA0 = "res\\area_json\\area0.json";
     public static final String PATH_AREA_FORUMLVIV = "res\\area_json\\area_forum_lviv.json";
 
     private Map<FireCellMoore2DStochastic, Rectangle> gridMap;
@@ -72,9 +75,11 @@ public class ControllerFX {
         return grid;
     }
 
+    public static Timeline timeline = new Timeline(60);
+
     @FXML
     public void initialize() {
-        sc = new Scale(5, 5);
+        sc = new Scale(3, 3);
         clickedInit();
     }
 
@@ -100,19 +105,13 @@ public class ControllerFX {
 
     }
 
-    private void paintBlocked(Shape shape) {
-        shape.setFill(Color.BLACK);
-        shape.setStroke(Color.BLACK);
-        shape.setStrokeWidth(0.4);
-    }
-
     @FXML
     public void clickedInit() {
         initGridMap(PATH_AREA_FORUMLVIV);
         agentPaths = AreaFX.initAgentsPath(
                 Utils.randomAgents(
                         new ArrayList<>(grid.getAdjTable().keySet()),
-                        1));
+                        100));
 
         for (var path : agentPaths.values()) {
             AreaFX.paintPath(path);
@@ -120,20 +119,17 @@ public class ControllerFX {
             group.getChildren().add(path);
         }
 
-//        grid.getAdjTable().keySet().stream().limit(4).forEach(FireCellMoore2DStochastic::setFire);
-
-        grid.get(60, 110).setFire();
-
+        grid.getAdjTable().keySet().stream().limit(4).forEach(FireCellMoore2DStochastic::setFire);
         modelController = new ControllerTAARiskFire(this, exits,
-                new FireSpreadCAStochastic(grid, 1000), 10.0, 200);
+                new FireSpreadCAStochastic(grid, 1000), 5.0, 100);
 
-//        agentPaths.keySet().forEach(this::updatePathFX);
         AreaFX.updateGrid(gridMap,
                 agentPaths.keySet().stream().map(Agent::getPosition).collect(Collectors.toList()),
                 exits);
 
         initCellMouseRClick();
 
+        //  buttons RE
         btn_start.setDisable(false);
         btn_resume.setDisable(true);
         btn_pause.setDisable(true);
@@ -218,6 +214,14 @@ public class ControllerFX {
             e.printStackTrace();
         }
 
+        pane_draw.setOnScroll(event -> NodeTransformsFX.zoom(timeline, group, event));
+        pane_draw.setOnZoom(event -> NodeTransformsFX.zoom(timeline, group, event));
+
+        pane_draw.setOnMousePressed(event -> NodeTransformsFX.setDragContext(group, event));
+        pane_draw.setOnMouseDragged(event -> NodeTransformsFX.shift(group, event));
+
+        vbox_controller.toFront();
+
         scale(group, sc);
     }
 
@@ -268,12 +272,14 @@ public class ControllerFX {
             @Override
             protected List<FireCellMoore2DStochastic> cellLineFirst
                     (int y, int x0, int x1, List<List<FireCellMoore2DStochastic>> map) {
-                FireCellMoore2DStochastic cell = FireCellMoore2DStochastic.at(x0, y);
+                var cell = FireCellMoore2DStochastic.at(x0, y);
+//                addNode(cell);
                 List<FireCellMoore2DStochastic> cellLine = new ArrayList<>();
                 cellLine.add(cell);
                 try {
                     for (int w = x0 + 1; w < x1 + 1; w++) {
                         cell = FireCellMoore2DStochastic.at(w, y);
+//                        addNode(cell);
                         cellLine.add(cell);
                         addTransition(cell, cellLine.get(w - x0 - 1), NodeMoore2D.VEC_LEFT, 1);
                     }
@@ -286,23 +292,26 @@ public class ControllerFX {
             @Override
             protected List<FireCellMoore2DStochastic> cellLine
                     (int y, int x0, int x1, List<List<FireCellMoore2DStochastic>> map) {
-                var cell = FireCellMoore2DStochastic.at(x0, y);
                 List<FireCellMoore2DStochastic> cellLine = new ArrayList<>();
-                cellLine.add(cell);
+
                 try {
+                    var cell = FireCellMoore2DStochastic.at(x0, y);
+                    addTransition(cell, getAtRect(x0    , y - 1, map), NodeMoore2D.VEC_TOP     , 1.0);
+                    addTransition(cell, getAtRect(x0 + 1, y - 1, map), NodeMoore2D.VEC_TOP_RIGHT, 1.3);
+                    cellLine.add(cell);
                     for (int w = x0 + 1; w < x1; w++) {
                         cell = FireCellMoore2DStochastic.at(w, y);
                         cellLine.add(cell);
-                        addTransition(cell, cellLine.get(w - x0 - 1), NodeMoore2D.VEC_LEFT, 1);
-                        addTransition(cell, getAtRect(w - 1, y - 1, map), NodeMoore2D.VEC_TOP_LEFT, 1.3);
-                        addTransition(cell, getAtRect(w, y - 1, map), NodeMoore2D.VEC_TOP, 1);
+                        addTransition(cell, cellLine.get(w - x0 - 1)    , NodeMoore2D.VEC_LEFT     , 1.0);
+                        addTransition(cell, getAtRect(w - 1, y - 1, map), NodeMoore2D.VEC_TOP_LEFT , 1.3);
+                        addTransition(cell, getAtRect(w    , y - 1, map), NodeMoore2D.VEC_TOP      , 1.0);
                         addTransition(cell, getAtRect(w + 1, y - 1, map), NodeMoore2D.VEC_TOP_RIGHT, 1.3);
                     }
                     cell = FireCellMoore2DStochastic.at(x1, y);
                     cellLine.add(cell);
-                    addTransition(cell, cellLine.get(x1 - x0 - 1), NodeMoore2D.VEC_LEFT, 1);
+                    addTransition(cell, cellLine.get(x1 - x0 - 1)    , NodeMoore2D.VEC_LEFT    , 1.0);
                     addTransition(cell, getAtRect(x1 - 1, y - 1, map), NodeMoore2D.VEC_TOP_LEFT, 1.3);
-                    addTransition(cell, getAtRect(x1, y - 1, map), NodeMoore2D.VEC_TOP, 1);
+                    addTransition(cell, getAtRect(x1    , y - 1, map), NodeMoore2D.VEC_TOP     , 1.0);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

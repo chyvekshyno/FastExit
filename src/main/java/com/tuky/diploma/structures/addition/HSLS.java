@@ -5,10 +5,13 @@ public class HSLS implements Comparable<HSLS>{
     private final int xL;
     private final int xR;
 
-    public HSLS(int y, int xL, int xR) {
+    private final int flag;
+
+    public HSLS(int y, int xL, int xR, int flag) {
         this.y = y;
         this.xL = xL;
         this.xR = xR;
+        this.flag = flag;
     }
 
     public int y() {
@@ -42,5 +45,9 @@ public class HSLS implements Comparable<HSLS>{
 
     public boolean isEqual(HSLS another) {
         return this.compareTo(another) == 0;
+    }
+
+    public int getFlag() {
+        return flag;
     }
 }
