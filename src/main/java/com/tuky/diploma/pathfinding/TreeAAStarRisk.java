@@ -36,6 +36,13 @@ public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
         });
     }
 
+//    @Override
+//    protected void updateH(N curr) {
+//        closed.stream()
+//                .filter(node -> dist.get(node) <= dist.get(curr))
+//                .forEach(node -> H.put(node, dist.get(curr) + distW * H.get(curr)));
+//    }
+
     @Override
     protected Comparator<N> openComparator() {
         return Comparator.comparing(node -> dist.get(node)
@@ -43,4 +50,8 @@ public class TreeAAStarRisk <N extends NodeMoore2D<?, Integer> & Risk>
                                             + riskW * R.get(node));
     }
 
+//    @Override
+//    protected boolean relaxCondition(N curr, N next, double weight) {
+//        return super.relaxCondition(curr, next, weight) && R.get(next) < 20;
+//    }
 }

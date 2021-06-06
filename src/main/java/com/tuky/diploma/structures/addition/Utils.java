@@ -21,6 +21,7 @@ public class Utils{
                 .limit(number)
                 .mapToObj(i -> new Agent<>(nodes.get(i)) )
                 .collect(Collectors.toList());
+
     }
 
     public static <N extends Node2D<?, Integer> & Risk> double risk(N node, Map<N, List<N>> covered, double radius) {

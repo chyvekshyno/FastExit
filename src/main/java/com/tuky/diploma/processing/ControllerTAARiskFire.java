@@ -3,6 +3,7 @@ package com.tuky.diploma.processing;
 import com.tuky.diploma.camodels.FireCellMoore2DStochastic;
 import com.tuky.diploma.camodels.FireSpreadCAStochastic;
 import com.tuky.diploma.pathfinding.Pathfinding;
+import com.tuky.diploma.pathfinding.TreeAAStar;
 import com.tuky.diploma.pathfinding.TreeAAStarRisk;
 import com.tuky.diploma.structures.addition.Utils;
 import com.tuky.diploma.structures.graph.Graph;
@@ -33,8 +34,10 @@ public class ControllerTAARiskFire extends ControllerTAAFire{
         this.Risk = new HashMap<>();
         initRisk();
 
-        initPathfinders(exits);
+        initPathfinders();
         initAgents(fx.getAgentPaths().keySet());
+
+        updatePaths();
     }
 
     @Override
@@ -44,7 +47,7 @@ public class ControllerTAARiskFire extends ControllerTAAFire{
         updatePaths(changed);
         stepAgents();
         reDraw();
-        agents.keySet().removeIf(this::isSafe);
+        agentPF.keySet().removeIf(this::isSafe);
     }
 
     @Override
@@ -73,5 +76,17 @@ public class ControllerTAARiskFire extends ControllerTAAFire{
                 .map(covered::get)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    protected void choosePath(Agent<FireCellMoore2DStochastic> agent) {
+        var bestPF = pathfinders.get(agent).values().stream()
+                .map(pf -> (TreeAAStarRisk<FireCellMoore2DStochastic>) pf)
+                .filter(pf -> pf.getPathRisk() < 50)
+                .min(Comparator.comparing(Pathfinding::getPathLen))
+                .orElse((TreeAAStarRisk<FireCellMoore2DStochastic>) pathfinders.get(agent).values().stream().findAny().get());
+
+        agentPF.replace(agent, bestPF);
+        agent.updatePath(bestPF.getPath());
     }
 }

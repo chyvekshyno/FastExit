@@ -10,6 +10,7 @@ import com.tuky.diploma.visual.ControllerFX;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -18,15 +19,15 @@ public class ControllerFire{
 
     //  region  Fields
     protected final RegularNetMoore2D<FireCellMoore2DStochastic> graph;
-//    protected final Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> agentsPathfinding;
-    protected final Map<FireCellMoore2DStochastic, Pathfinding<FireCellMoore2DStochastic>> pathfinders;
-    protected final Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> agents;
+    protected final Map<Agent<FireCellMoore2DStochastic>, Pathfinding<FireCellMoore2DStochastic>> agentPF;
+    protected final Map<Agent<FireCellMoore2DStochastic>,
+                        Map<FireCellMoore2DStochastic,
+                            Pathfinding<FireCellMoore2DStochastic>>> pathfinders;
     protected final List<FireCellMoore2DStochastic> exits;
     protected final FireSpreadCAStochastic CA;
     protected final ControllerFX fx;
 
     protected final Map<FireCellMoore2DStochastic, Rectangle> gridFX;
-
     protected int ts;
     protected final AtomicBoolean processing;
     //endregion
@@ -39,25 +40,32 @@ public class ControllerFire{
         this.graph = fx.getGrid();
         this.exits = exits;
         this.CA = CA;
-        this.gridFX = fx.getGridMap();
-//        this.agentsPathfinding = new HashMap<>();
+        this.agentPF = new HashMap<>();
         this.pathfinders = new HashMap<>();
-        this.agents = new HashMap<>();
         this.ts = ts;
         processing = new AtomicBoolean(true);
 
-        initPathfinders(exits);
+        initPathfinders();
         initAgents(fx.getAgentPaths().keySet());
 
-//        initAgentsPathfinding(fx.getAgentPaths().keySet());
+        for (int i =0; i < 10; i++)
+            CA.nextState();
+
+        reDraw();
     }
 
-    protected void initPathfinders(List<FireCellMoore2DStochastic> exits) {
-        exits.forEach(exit -> pathfinders.put(exit, choosePathfinding(graph)));
+    protected void initPathfinders() {
+        Map<FireCellMoore2DStochastic, Pathfinding<FireCellMoore2DStochastic>> pfs;
+        for (var agent : fx.getAgentPaths().keySet()){
+            pfs = new HashMap<>();
+            for (var exit : exits)
+                pfs.put(exit, choosePathfinding(graph));
+            pathfinders.put(agent, pfs);
+        }
     }
 
     protected void initAgents(Set<Agent<FireCellMoore2DStochastic>> agents) {
-        agents.forEach(agent -> this.agents.put(agent, null));
+        agents.forEach(agent -> this.agentPF.put(agent, null));
     }
 
 
@@ -85,7 +93,7 @@ public class ControllerFire{
     public void resume() throws InterruptedException {
         processing.set(true);
         Thread.sleep(ts);
-        while (processing.get() && !agents.isEmpty()) {
+        while (processing.get() && !agentPF.isEmpty()) {
             step();
             Thread.sleep(ts);
         }
@@ -93,18 +101,18 @@ public class ControllerFire{
 
     public void abort() {
         processing.set(false);
-        gridFX.clear();
-        agents.clear();
         pathfinders.clear();
+        agentPF.clear();
         exits.clear();
     }
 
     public void step() {
+        reDraw();
         var changed = stepCA();
         updatePaths(changed);
         stepAgents();
-        reDraw();
-        agents.keySet().removeIf(this::isSafe);
+        agentPF.keySet().removeIf(this::isSafe);
+        pathfinders.keySet().removeIf(this::isSafe);
     }
 
     protected void stepAgent(Agent<FireCellMoore2DStochastic> agent) {
@@ -112,7 +120,7 @@ public class ControllerFire{
     }
 
     protected void stepAgents() {
-        agents.keySet().forEach(this::stepAgent);
+        pathfinders.keySet().forEach(this::stepAgent);
     }
 
     protected Set<FireCellMoore2DStochastic> stepCA() {
@@ -130,11 +138,21 @@ public class ControllerFire{
         return false;
     }
 
-    private void updatePaths() {
-        for (var agent : agents.keySet()) {
-            List<Thread> update = pathfinders.keySet().stream()
+    protected void updatePaths() {
+        List<Thread> update = new ArrayList<>();
+
+        pathfinders.forEach((agent, pf) -> {
+            update.addAll(pf.keySet().stream()
                     .map(exit -> updatePath(agent, exit))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()));
+        });
+
+        try {
+            for (Thread thread : update)
+                thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
             try {
                 for (Thread thread : update)
@@ -143,26 +161,57 @@ public class ControllerFire{
                 e.printStackTrace();
             }
 
-            choosePath(agent);
-        }
+
+//        for (var agent : agentPF.keySet()) {
+//            List<Thread> update = pathfinders.keySet().stream()
+//                    .map(exit -> updatePath(agent, exit))
+//                    .collect(Collectors.toList());
+//            try {
+//                for (Thread thread : update)
+//                    thread.join();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//            choosePath(agent);
+//        }
     }
 
     protected void updatePaths(Set<FireCellMoore2DStochastic> changedCost) {
-        for (var agent : agents.keySet()) {
-            if (updatePathCondition(agent, changedCost)) {
-                List<Thread> update = pathfinders.keySet().stream()
-                                        .map(exit -> updatePath(agent, exit))
-                                        .collect(Collectors.toList());
-                try {
-                    for (Thread thread : update)
-                        thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-                choosePath(agent);
-            }
+        List<Thread> update = new ArrayList<>();
+
+        pathfinders.forEach((agent, pf) -> {
+            if (updatePathCondition(agent, changedCost))
+                update.addAll(pf.keySet().stream()
+                        .map(exit -> updatePath(agent, exit))
+                        .collect(Collectors.toList()));
+        });
+
+        try {
+            for (Thread thread : update)
+                thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+        pathfinders.keySet().forEach(this::choosePath);
+
+//        for (var agent : agents.keySet()) {
+//            if (updatePathCondition(agent, changedCost)) {
+//                List<Thread> update = pathfinders.keySet().stream()
+//                                        .map(exit -> updatePath(agent, exit))
+//                                        .collect(Collectors.toList());
+//                try {
+//                    for (Thread thread : update)
+//                        thread.join();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                choosePath(agent);
+//            }
+//        }
     }
 
     protected Thread updatePath(Agent<FireCellMoore2DStochastic> agent,
@@ -174,15 +223,15 @@ public class ControllerFire{
 
     protected Runnable updatePathRunnable(Agent<FireCellMoore2DStochastic> agent,
                                           FireCellMoore2DStochastic exit) {
-        return () -> pathfinders.get(exit).path(agent.getPosition(), exit);
+        return () -> pathfinders.get(agent).get(exit).path(agent.getPosition(), exit);
     }
 
     protected void choosePath(Agent<FireCellMoore2DStochastic> agent) {
-        var bestPF = pathfinders.values().stream()
+        var bestPF = pathfinders.get(agent).values().stream()
                 .min(Comparator.comparing(Pathfinding::getPathLen))
                 .orElseThrow();
 
-        agents.replace(agent, bestPF);
+        agentPF.replace(agent, bestPF);
         agent.updatePath(bestPF.getPath());
     }
 
@@ -191,9 +240,9 @@ public class ControllerFire{
     }
 
     protected void reDraw() {
-        agents.keySet().forEach(fx::updatePathFX);
-        AreaFX.updateGrid(gridFX,
-                agents.keySet().stream().map(Agent::getPosition)
+        pathfinders.keySet().forEach(fx::updatePathFX);
+        AreaFX.updateGrid(fx.getGridMap(),
+                pathfinders.keySet().stream().map(Agent::getPosition)
                         .collect(Collectors.toList()),
                 exits);
     }

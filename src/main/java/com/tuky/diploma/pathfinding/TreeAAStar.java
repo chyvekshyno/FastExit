@@ -9,6 +9,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         extends AdaptiveAStar<N>{
 
     protected int counter;
+    protected int pathLen;
     protected Map<N, Integer> generated;
     protected Map<N, Integer> Id;
     protected Map<N, N> pathTree;
@@ -46,7 +47,6 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
             curr = next;
         }
         return len;
-//        return super.getPathLen();
     }
 
     @Override
@@ -87,16 +87,18 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
 
     @Override
     protected Map<N, N> algorithm(N source, N target) {
-        N current;
+        N current = null;
         while (!open.isEmpty()) {
             current = open.poll();
             if (current == target || H.get(current) <= H_max.get(Id.get(current))) {
                 updateH(current);
                 addPath(current);
+                clearData();
                 return pathTree;
             }
             process(current, dist, parent, open, closed);
         }
+        clearData();
         return null;
     }
 
@@ -122,6 +124,8 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
             return;
 
         int pathCurr = Id.get(curr);
+        var hmax = H_max.get(pathCurr);
+        var h = H.get(pathTree.get(curr));
         if (H_max.get(pathCurr) > H.get(pathTree.get(curr)))
             H_max.put(pathCurr, H.get(pathTree.get(curr)));
 
@@ -136,8 +140,7 @@ public class TreeAAStar <N extends Node2D<?, Integer>>
         while (!queue.isEmpty()) {
             path = queue.poll();
             if (H_max.get(path) > H_min.get(path)) {
-                H_max.put(path, 0.);
-                H_min.put(path, 0.);
+                H_max.put(path, H_min.get(path));
                 queue.addAll(paths.get(path));
                 paths.get(path).clear();
             }

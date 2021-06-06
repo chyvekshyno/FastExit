@@ -28,8 +28,9 @@ public class ControllerTAAFire extends ControllerFire {
 
     @Override
     protected void updatePaths(Set<FireCellMoore2DStochastic> changedCost) {
-        for (var pf : pathfinders.values())
-            updateTAAPaths((TreeAAStar<FireCellMoore2DStochastic>) pf, changedCost);
+        for (var epf : pathfinders.values())
+            for (var pf : epf.values())
+                updateTAAPaths((TreeAAStar<FireCellMoore2DStochastic>) pf, changedCost);
 
         super.updatePaths(changedCost);
     }
@@ -50,13 +51,15 @@ public class ControllerTAAFire extends ControllerFire {
     }
 
     protected boolean updatePathConditionTreeAA(Agent<FireCellMoore2DStochastic> agent) {
-        var pathfinding = (TreeAAStar<FireCellMoore2DStochastic>) agents.get(agent);
+        var pathfinding = (TreeAAStar<FireCellMoore2DStochastic>) agentPF.get(agent);
+        if (pathfinding == null)
+            return false;
 
         double h_curr = pathfinding.getH()
                 .get(agent.getPosition());
         double H_max = pathfinding.getH_max()
                 .get(pathfinding.getId()
                         .get(agent.getPosition()));
-        return h_curr >= H_max;
+        return h_curr > H_max;
     }
 }
