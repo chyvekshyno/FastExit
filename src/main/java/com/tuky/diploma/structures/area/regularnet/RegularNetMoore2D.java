@@ -2,13 +2,14 @@ package com.tuky.diploma.structures.area.regularnet;
 
 import com.tuky.diploma.structures.addition.HSLS;
 import com.tuky.diploma.structures.area.Area;
-import com.tuky.diploma.structures.area.IntCoord;
 import com.tuky.diploma.structures.area.Zone;
 import com.tuky.diploma.structures.graph.Moore2D;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 import com.tuky.diploma.structures.graph.Transition;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class RegularNetMoore2D
