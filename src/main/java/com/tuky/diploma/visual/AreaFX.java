@@ -5,8 +5,17 @@ import com.tuky.diploma.processing.Agent;
 import com.tuky.diploma.structures.area.*;
 import com.tuky.diploma.structures.graph.NodeMoore2D;
 import com.tuky.diploma.structures.graph.Node2D;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.ZoomEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.util.Duration;
 
 import java.util.*;
 import java.util.stream.Collectors;
